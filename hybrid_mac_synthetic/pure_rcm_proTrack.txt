@@ -1,0 +1,770 @@
+Iteration: 3
+Index: 0 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.137973,0.00113165,8.19604e-06)
+(p0FromRP, p1FromRP, p2FromRP): (0.138317,0.854636,0.00704695)
+Channel information: (0.997513,0.00132414,0.00116306)
+
+Iteration: 3
+Index: 156 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0431737,0.00983663,0.00189734)
+(p0FromRP, p1FromRP, p2FromRP): (0.0475625,0.929211,0.0232263)
+Channel information: (0.907724,0.010586,0.0816895)
+
+Iteration: 3
+Index: 163 (sys1, sys2):(0,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00312105,0.00810468,0.0179168)
+(p0FromRP, p1FromRP, p2FromRP): (0.0573729,0.923502,0.019125)
+Channel information: (0.0543994,0.00877603,0.936825)
+
+Iteration: 3
+Index: 167 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.202129,0.00120397,6.07975e-06)
+(p0FromRP, p1FromRP, p2FromRP): (0.202747,0.793277,0.00397668)
+Channel information: (0.996953,0.00151772,0.00152885)
+
+Iteration: 3
+Index: 186 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0159378,0.0108319,0.00624696)
+(p0FromRP, p1FromRP, p2FromRP): (0.0180102,0.921522,0.0604679)
+Channel information: (0.884935,0.0117544,0.10331)
+
+Iteration: 3
+Index: 243 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0150902,0.00415288,0.0010422)
+(p0FromRP, p1FromRP, p2FromRP): (0.421671,0.57724,0.001089)
+Channel information: (0.0357866,0.00719436,0.957019)
+
+Iteration: 3
+Index: 286 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0383263,0.0169119,0.00653014)
+(p0FromRP, p1FromRP, p2FromRP): (0.0917181,0.896689,0.0115933)
+Channel information: (0.417871,0.0188604,0.563269)
+
+Iteration: 3
+Index: 365 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00260902,0.0081344,0.0207457)
+(p0FromRP, p1FromRP, p2FromRP): (0.0482606,0.929603,0.0221361)
+Channel information: (0.0540612,0.0087504,0.937188)
+
+Iteration: 3
+Index: 377 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0390097,0.0154506,0.00511365)
+(p0FromRP, p1FromRP, p2FromRP): (0.0533077,0.926363,0.0203295)
+Channel information: (0.731783,0.0166788,0.251538)
+
+Iteration: 3
+Index: 391 (sys1, sys2):(0,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.0126243,0.00893843,0.00530638)
+(p0FromRP, p1FromRP, p2FromRP): (0.153172,0.840977,0.00585078)
+Channel information: (0.0824187,0.0106286,0.906953)
+
+Iteration: 3
+Index: 413 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.42028,0.00709481,0.000115476)
+(p0FromRP, p1FromRP, p2FromRP): (0.526062,0.473318,0.000620529)
+Channel information: (0.798917,0.0149895,0.186094)
+
+Iteration: 3
+Index: 509 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0449452,0.00602661,0.000672421)
+(p0FromRP, p1FromRP, p2FromRP): (0.0465888,0.930062,0.0233488)
+Channel information: (0.964721,0.00647979,0.0287989)
+
+Iteration: 3
+Index: 828 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.000262039,0.00298657,0.028696)
+(p0FromRP, p1FromRP, p2FromRP): (0.000276891,0.369957,0.629766)
+Channel information: (0.946361,0.00807275,0.0455662)
+
+Iteration: 3
+Index: 930 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.203476,0.00290873,3.46019e-05)
+(p0FromRP, p1FromRP, p2FromRP): (0.824469,0.175484,4.69733e-05)
+Channel information: (0.246796,0.0165754,0.736628)
+
+Iteration: 3
+Index: 970 (sys1, sys2):(1,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.02034,0.0158219,0.0112214)
+(p0FromRP, p1FromRP, p2FromRP): (0.07133,0.912582,0.0160878)
+Channel information: (0.285153,0.0173375,0.697509)
+
+Iteration: 3
+Index: 1038 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.024545,0.0113491,0.00539128)
+(p0FromRP, p1FromRP, p2FromRP): (0.165485,0.828081,0.00643372)
+Channel information: (0.148322,0.0137053,0.837973)
+
+Iteration: 3
+Index: 1061 (sys1, sys2):(1,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00198897,0.0101137,0.0471827)
+(p0FromRP, p1FromRP, p2FromRP): (0.00241942,0.709274,0.288307)
+Channel information: (0.822086,0.0142592,0.163654)
+
+Iteration: 3
+Index: 1183 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.255771,0.00727349,0.000174041)
+(p0FromRP, p1FromRP, p2FromRP): (0.613897,0.385795,0.000308304)
+Channel information: (0.416635,0.0188532,0.564512)
+
+Iteration: 3
+Index: 1193 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00252486,0.00632136,0.013744)
+(p0FromRP, p1FromRP, p2FromRP): (0.00268843,0.734178,0.263134)
+Channel information: (0.939158,0.00861012,0.052232)
+
+Iteration: 3
+Index: 1209 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.026198,0.0176197,0.0112272)
+(p0FromRP, p1FromRP, p2FromRP): (0.0514734,0.924739,0.0237872)
+Channel information: (0.508962,0.0190537,0.471984)
+
+Iteration: 3
+Index: 1360 (sys1, sys2):(1,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0345933,0.0101491,0.00244778)
+(p0FromRP, p1FromRP, p2FromRP): (0.0383329,0.933429,0.0282385)
+Channel information: (0.902445,0.010873,0.0866824)
+
+Iteration: 3
+Index: 1407 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0509043,0.00624037,0.000642778)
+(p0FromRP, p1FromRP, p2FromRP): (0.0529117,0.926488,0.0206)
+Channel information: (0.962062,0.00673551,0.0312028)
+
+Iteration: 3
+Index: 1448 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (9.08203e-05,0.0062921,0.357506)
+(p0FromRP, p1FromRP, p2FromRP): (0.000203544,0.331329,0.668467)
+Channel information: (0.446195,0.0189905,0.534814)
+
+Iteration: 3
+Index: 1548 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.025643,0.0144177,0.00716348)
+(p0FromRP, p1FromRP, p2FromRP): (0.0327933,0.931844,0.0353628)
+Channel information: (0.781957,0.0154722,0.202571)
+
+Iteration: 3
+Index: 1620 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.0053603,0.0121728,0.0261745)
+(p0FromRP, p1FromRP, p2FromRP): (0.0402924,0.929053,0.0306542)
+Channel information: (0.133035,0.0131023,0.853863)
+
+Iteration: 3
+Index: 2188 (sys1, sys2):(1,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.052756,0.0126505,0.00278626)
+(p0FromRP, p1FromRP, p2FromRP): (0.22264,0.773628,0.00373148)
+Channel information: (0.236956,0.0163522,0.746692)
+
+Iteration: 3
+Index: 2281 (sys1, sys2):(1,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00596637,0.0130353,0.0268069)
+(p0FromRP, p1FromRP, p2FromRP): (0.00755262,0.854818,0.137629)
+Channel information: (0.789974,0.0152492,0.194776)
+
+Iteration: 3
+Index: 2452 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0275844,0.0032795,0.000355972)
+(p0FromRP, p1FromRP, p2FromRP): (0.0279156,0.929391,0.042693)
+Channel information: (0.988133,0.00352866,0.00833795)
+
+Iteration: 3
+Index: 2497 (sys1, sys2):(1,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.000372663,0.00238203,0.014122)
+(p0FromRP, p1FromRP, p2FromRP): (0.000384033,0.403969,0.595647)
+Channel information: (0.970395,0.00589657,0.0237086)
+
+Iteration: 3
+Index: 2573 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.127777,0.0140154,0.00127346)
+(p0FromRP, p1FromRP, p2FromRP): (0.181446,0.813982,0.00457143)
+Channel information: (0.704212,0.0172183,0.278569)
+
+Iteration: 3
+Index: 2848 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.331175,0.00335216,2.89741e-05)
+(p0FromRP, p1FromRP, p2FromRP): (0.821337,0.178613,5.01266e-05)
+Channel information: (0.403215,0.0187677,0.578018)
+
+Iteration: 3
+Index: 3174 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.000276822,0.00218937,0.0139868)
+(p0FromRP, p1FromRP, p2FromRP): (0.0723852,0.91354,0.0140744)
+Channel information: (0.00382429,0.00239658,0.993779)
+
+Iteration: 3
+Index: 3175 (sys1, sys2):(0,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00483737,0.0158925,0.0475793)
+(p0FromRP, p1FromRP, p2FromRP): (0.00784516,0.861784,0.130371)
+Channel information: (0.616606,0.0184414,0.364953)
+
+Iteration: 3
+Index: 3267 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.00596424,0.0109679,0.0163646)
+(p0FromRP, p1FromRP, p2FromRP): (0.00691131,0.861433,0.131655)
+Channel information: (0.862969,0.0127322,0.124299)
+
+Iteration: 3
+Index: 3269 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (5.47966e-06,0.000329109,0.0196377)
+(p0FromRP, p1FromRP, p2FromRP): (5.62836e-06,0.0593803,0.940614)
+Channel information: (0.97358,0.00554239,0.0208775)
+
+Iteration: 3
+Index: 3293 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.000152083,0.00670573,0.263624)
+(p0FromRP, p1FromRP, p2FromRP): (0.00241277,0.713377,0.28421)
+Channel information: (0.0630326,0.00939998,0.927567)
+
+Iteration: 3
+Index: 3311 (sys1, sys2):(1,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.00247845,0.00575377,0.0119653)
+(p0FromRP, p1FromRP, p2FromRP): (0.00261407,0.725101,0.272285)
+Channel information: (0.948121,0.00793513,0.0439442)
+
+Iteration: 3
+Index: 3357 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0206315,0.0168897,0.0114284)
+(p0FromRP, p1FromRP, p2FromRP): (0.0587127,0.923156,0.0181314)
+Channel information: (0.351397,0.0182956,0.630308)
+
+Iteration: 3
+Index: 3399 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.00388107,0.0012009,0.000318985)
+(p0FromRP, p1FromRP, p2FromRP): (0.00389299,0.788774,0.207333)
+Channel information: (0.996939,0.0015225,0.00153851)
+
+Iteration: 3
+Index: 3425 (sys1, sys2):(1,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0309304,0.00761367,0.00168296)
+(p0FromRP, p1FromRP, p2FromRP): (0.325779,0.672338,0.00188307)
+Channel information: (0.0949428,0.0113242,0.893733)
+
+Iteration: 3
+Index: 3488 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.000178443,0.00371972,0.0621272)
+(p0FromRP, p1FromRP, p2FromRP): (0.000199197,0.331556,0.668245)
+Channel information: (0.89581,0.011219,0.0929708)
+
+Iteration: 3
+Index: 3600 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (6.13739e-07,0.000739263,0.777837)
+(p0FromRP, p1FromRP, p2FromRP): (3.70828e-06,0.0516142,0.948382)
+Channel information: (0.165505,0.0143229,0.820172)
+
+Iteration: 3
+Index: 3751 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.171762,0.00381418,6.97048e-05)
+(p0FromRP, p1FromRP, p2FromRP): (0.175133,0.820091,0.00477626)
+Channel information: (0.980755,0.00465093,0.014594)
+
+Iteration: 3
+Index: 3839 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0480876,0.0105242,0.00216104)
+(p0FromRP, p1FromRP, p2FromRP): (0.0538894,0.923662,0.0224483)
+Channel information: (0.892339,0.011394,0.0962673)
+
+Iteration: 3
+Index: 3949 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0681652,0.00272403,9.88307e-05)
+(p0FromRP, p1FromRP, p2FromRP): (0.0687774,0.914537,0.0166852)
+Channel information: (0.991098,0.00297859,0.00592326)
+
+Iteration: 3
+Index: 4076 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.163867,0.00333714,6.03562e-05)
+(p0FromRP, p1FromRP, p2FromRP): (0.166352,0.828115,0.00553301)
+Channel information: (0.985062,0.0040298,0.0109084)
+
+Iteration: 3
+Index: 4181 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00190861,0.00651967,0.0189933)
+(p0FromRP, p1FromRP, p2FromRP): (0.00205693,0.695149,0.302794)
+Channel information: (0.927894,0.00937881,0.0627268)
+
+Iteration: 3
+Index: 4304 (sys1, sys2):(1,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0214264,0.0177038,0.013487)
+(p0FromRP, p1FromRP, p2FromRP): (0.0418386,0.929394,0.0287673)
+Channel information: (0.512121,0.0190487,0.468831)
+
+Iteration: 3
+Index: 4449 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00237418,0.0158806,0.0857038)
+(p0FromRP, p1FromRP, p2FromRP): (0.00557918,0.840154,0.154267)
+Channel information: (0.425544,0.018902,0.555554)
+
+Iteration: 3
+Index: 4458 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.634177,0.00337053,1.60712e-05)
+(p0FromRP, p1FromRP, p2FromRP): (0.730418,0.269447,0.000134767)
+Channel information: (0.868239,0.012509,0.119252)
+
+Iteration: 3
+Index: 4526 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.00408724,0.00108296,0.000245655)
+(p0FromRP, p1FromRP, p2FromRP): (0.00409785,0.7959,0.200002)
+Channel information: (0.997411,0.00136067,0.00122826)
+
+Iteration: 3
+Index: 4537 (sys1, sys2):(1,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00115873,0.0110295,0.0863232)
+(p0FromRP, p1FromRP, p2FromRP): (0.00995559,0.890963,0.0990819)
+Channel information: (0.11639,0.0123793,0.871231)
+
+Iteration: 3
+Index: 5058 (sys1, sys2):(1,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00763299,0.0122494,0.0178749)
+(p0FromRP, p1FromRP, p2FromRP): (0.0556825,0.92328,0.0210379)
+Channel information: (0.13708,0.0132672,0.849652)
+
+Iteration: 3
+Index: 5076 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.121271,0.00585235,0.000239321)
+(p0FromRP, p1FromRP, p2FromRP): (0.126081,0.866297,0.00762261)
+Channel information: (0.961848,0.00675559,0.0313962)
+
+Iteration: 3
+Index: 5083 (sys1, sys2):(1,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.000254115,0.000942,0.00321516)
+(p0FromRP, p1FromRP, p2FromRP): (0.000256072,0.346675,0.653069)
+Channel information: (0.99236,0.00271724,0.00492316)
+
+Iteration: 3
+Index: 5178 (sys1, sys2):(1,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0477335,0.0169201,0.00494045)
+(p0FromRP, p1FromRP, p2FromRP): (0.080585,0.906715,0.0127003)
+Channel information: (0.592337,0.0186609,0.389002)
+
+Iteration: 3
+Index: 5288 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.433942,0.00624368,7.85276e-05)
+(p0FromRP, p1FromRP, p2FromRP): (0.648986,0.350764,0.000250444)
+Channel information: (0.668646,0.0178002,0.313554)
+
+Iteration: 3
+Index: 5350 (sys1, sys2):(1,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00808614,0.013236,0.0178136)
+(p0FromRP, p1FromRP, p2FromRP): (0.0494912,0.928847,0.0216614)
+Channel information: (0.163385,0.0142499,0.822365)
+
+Iteration: 3
+Index: 5357 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00778238,0.0158702,0.0259321)
+(p0FromRP, p1FromRP, p2FromRP): (0.0114057,0.902178,0.086416)
+Channel information: (0.682325,0.0175909,0.300084)
+
+Iteration: 3
+Index: 5371 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.000889794,0.00675311,0.0418736)
+(p0FromRP, p1FromRP, p2FromRP): (0.0244824,0.931735,0.0437822)
+Channel information: (0.0363442,0.00724788,0.956408)
+
+Iteration: 3
+Index: 5473 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00567846,0.00966362,0.0153408)
+(p0FromRP, p1FromRP, p2FromRP): (0.00638277,0.838375,0.155242)
+Channel information: (0.889655,0.0115266,0.0988184)
+
+Iteration: 3
+Index: 5480 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0447819,0.00901431,0.00149049)
+(p0FromRP, p1FromRP, p2FromRP): (0.0485258,0.929378,0.0220963)
+Channel information: (0.922847,0.0096993,0.067454)
+
+Iteration: 3
+Index: 5567 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.429669,0.00687445,9.00666e-05)
+(p0FromRP, p1FromRP, p2FromRP): (0.588063,0.41158,0.000356494)
+Channel information: (0.730652,0.0167026,0.252646)
+
+Iteration: 3
+Index: 5575 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.709269,0.00233094,6.24266e-06)
+(p0FromRP, p1FromRP, p2FromRP): (0.802652,0.197288,5.97222e-05)
+Channel information: (0.883657,0.0118149,0.104528)
+
+Iteration: 3
+Index: 5705 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.00598652,0.0104163,0.0148136)
+(p0FromRP, p1FromRP, p2FromRP): (0.00682557,0.859488,0.133687)
+Channel information: (0.877072,0.0121193,0.110808)
+
+Iteration: 3
+Index: 5727 (sys1, sys2):(1,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00497009,0.0168307,0.0487771)
+(p0FromRP, p1FromRP, p2FromRP): (0.0130985,0.905874,0.0810277)
+Channel information: (0.37944,0.0185795,0.601981)
+
+Iteration: 3
+Index: 5793 (sys1, sys2):(0,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.0136856,0.0177339,0.0198697)
+(p0FromRP, p1FromRP, p2FromRP): (0.0299,0.932127,0.0379726)
+Channel information: (0.457711,0.0190251,0.523263)
+
+Iteration: 3
+Index: 5801 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0226172,0.00237643,0.000220441)
+(p0FromRP, p1FromRP, p2FromRP): (0.0227753,0.926895,0.0503293)
+Channel information: (0.993056,0.00256386,0.00437997)
+
+Iteration: 3
+Index: 5830 (sys1, sys2):(0,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00705212,0.00497846,0.00309462)
+(p0FromRP, p1FromRP, p2FromRP): (0.238387,0.758402,0.00321067)
+Channel information: (0.0295826,0.00656441,0.963853)
+
+Iteration: 3
+Index: 5846 (sys1, sys2):(1,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.000576281,0.0111836,0.178395)
+(p0FromRP, p1FromRP, p2FromRP): (0.00345832,0.778721,0.21782)
+Channel information: (0.166636,0.0143615,0.819002)
+
+Iteration: 3
+Index: 5965 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.114028,0.00185394,2.47712e-05)
+(p0FromRP, p1FromRP, p2FromRP): (0.858388,0.141583,2.90039e-05)
+Channel information: (0.13284,0.0130943,0.854065)
+
+Iteration: 3
+Index: 5978 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.00783351,0.00414245,0.00199828)
+(p0FromRP, p1FromRP, p2FromRP): (0.00799618,0.863462,0.128542)
+Channel information: (0.979657,0.00479749,0.0155457)
+
+Iteration: 3
+Index: 6021 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0761791,0.00736668,0.000600183)
+(p0FromRP, p1FromRP, p2FromRP): (0.0805565,0.906456,0.0129871)
+Channel information: (0.945659,0.0081269,0.0462138)
+
+Iteration: 3
+Index: 6110 (sys1, sys2):(1,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.00395348,0.0073919,0.0115107)
+(p0FromRP, p1FromRP, p2FromRP): (0.0042477,0.80414,0.191612)
+Channel information: (0.930735,0.0091923,0.060073)
+
+Iteration: 3
+Index: 6648 (sys1, sys2):(1,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.000505461,0.00822032,0.112655)
+(p0FromRP, p1FromRP, p2FromRP): (0.00794045,0.87052,0.121539)
+Channel information: (0.0636565,0.009443,0.9269)
+
+Iteration: 3
+Index: 6762 (sys1, sys2):(0,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00559166,0.0171043,0.0427825)
+(p0FromRP, p1FromRP, p2FromRP): (0.0139717,0.912397,0.0736309)
+Channel information: (0.400213,0.0187465,0.58104)
+
+Iteration: 3
+Index: 6853 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00210164,0.00935231,0.0386261)
+(p0FromRP, p1FromRP, p2FromRP): (0.0287405,0.929128,0.042131)
+Channel information: (0.0731245,0.0100657,0.91681)
+
+Iteration: 3
+Index: 6867 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.000719043,0.00829035,0.0794851)
+(p0FromRP, p1FromRP, p2FromRP): (0.0119906,0.902619,0.08539)
+Channel information: (0.0599673,0.00918477,0.930848)
+
+Iteration: 3
+Index: 7212 (sys1, sys2):(1,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00489154,0.0149267,0.0393752)
+(p0FromRP, p1FromRP, p2FromRP): (0.0215553,0.926427,0.0520178)
+Channel information: (0.22693,0.0161122,0.756958)
+
+Iteration: 3
+Index: 7297 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00195727,0.0112195,0.0544383)
+(p0FromRP, p1FromRP, p2FromRP): (0.0174281,0.920393,0.0621793)
+Channel information: (0.112305,0.0121899,0.875505)
+
+Iteration: 3
+Index: 7320 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00272428,0.0121025,0.0442997)
+(p0FromRP, p1FromRP, p2FromRP): (0.0206811,0.92752,0.0517989)
+Channel information: (0.131728,0.0130482,0.855224)
+
+Iteration: 3
+Index: 7354 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (1.16716e-07,0.00034199,0.814012)
+(p0FromRP, p1FromRP, p2FromRP): (5.00189e-05,0.182499,0.817451)
+Channel information: (0.00233343,0.00187393,0.995793)
+
+Iteration: 3
+Index: 7374 (sys1, sys2):(1,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.000891072,0.00348488,0.012743)
+(p0FromRP, p1FromRP, p2FromRP): (0.0883198,0.898757,0.0129235)
+Channel information: (0.0100892,0.00387744,0.986033)
+
+Iteration: 3
+Index: 7589 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.315801,0.0085406,0.00022672)
+(p0FromRP, p1FromRP, p2FromRP): (0.377444,0.62104,0.00151584)
+Channel information: (0.836681,0.0137521,0.149567)
+
+Iteration: 3
+Index: 7928 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00851678,0.0063709,0.00485053)
+(p0FromRP, p1FromRP, p2FromRP): (0.193203,0.80168,0.00511675)
+Channel information: (0.0440819,0.00794694,0.947971)
+
+Iteration: 3
+Index: 8042 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.144455,0.0113225,0.000790323)
+(p0FromRP, p1FromRP, p2FromRP): (0.172784,0.821953,0.0052624)
+Channel information: (0.836042,0.0137751,0.150183)
+
+Iteration: 3
+Index: 8131 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0267377,0.00275181,0.000248577)
+(p0FromRP, p1FromRP, p2FromRP): (0.026975,0.930454,0.0425715)
+Channel information: (0.991203,0.0029575,0.00583906)
+
+Iteration: 3
+Index: 8156 (sys1, sys2):(0,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00541609,0.0170215,0.0432345)
+(p0FromRP, p1FromRP, p2FromRP): (0.0140302,0.913347,0.0726224)
+Channel information: (0.386031,0.0186364,0.595332)
+
+Iteration: 3
+Index: 8180 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.000515296,0.0113092,0.238485)
+(p0FromRP, p1FromRP, p2FromRP): (0.00143217,0.615036,0.383532)
+Channel information: (0.3598,0.0183879,0.621812)
+
+Iteration: 3
+Index: 8278 (sys1, sys2):(0,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.000464874,0.0113646,0.240308)
+(p0FromRP, p1FromRP, p2FromRP): (0.00156246,0.647584,0.350854)
+Channel information: (0.297528,0.0175492,0.684923)
+
+Iteration: 3
+Index: 8281 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00434611,0.0139171,0.0361675)
+(p0FromRP, p1FromRP, p2FromRP): (0.00586285,0.844827,0.14931)
+Channel information: (0.741296,0.0164734,0.242231)
+
+Iteration: 3
+Index: 8311 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00424032,0.0160661,0.0536634)
+(p0FromRP, p1FromRP, p2FromRP): (0.0137538,0.906624,0.0796219)
+Channel information: (0.308302,0.0177208,0.673978)
+
+Iteration: 3
+Index: 8352 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (0.00591193,0.00942291,0.0126109)
+(p0FromRP, p1FromRP, p2FromRP): (0.07601,0.91016,0.0138298)
+Channel information: (0.0777784,0.010353,0.911869)
+
+Iteration: 3
+Index: 8405 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.00511944,0.00394303,0.0030655)
+(p0FromRP, p1FromRP, p2FromRP): (0.00522974,0.805507,0.189263)
+Channel information: (0.978908,0.00489509,0.016197)
+
+Iteration: 3
+Index: 8623 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0716359,0.0123753,0.00181657)
+(p0FromRP, p1FromRP, p2FromRP): (0.0855168,0.902259,0.0122244)
+Channel information: (0.837682,0.0137159,0.148602)
+
+Iteration: 3
+Index: 8683 (sys1, sys2):(1,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.00774231,0.00436352,0.00202564)
+(p0FromRP, p1FromRP, p2FromRP): (0.00791587,0.8724,0.119684)
+Channel information: (0.978073,0.00500174,0.0169249)
+
+Iteration: 3
+Index: 8866 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.102427,0.0128833,0.0015882)
+(p0FromRP, p1FromRP, p2FromRP): (0.127831,0.863528,0.00864019)
+Channel information: (0.801265,0.0149194,0.183815)
+
+Iteration: 3
+Index: 8881 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0391682,0.0167499,0.00653268)
+(p0FromRP, p1FromRP, p2FromRP): (0.0967329,0.891932,0.0113354)
+Channel information: (0.404911,0.0187793,0.57631)
+
+Iteration: 3
+Index: 9054 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (6.0386e-05,0.00322059,0.139244)
+(p0FromRP, p1FromRP, p2FromRP): (7.48208e-05,0.218461,0.781464)
+Channel information: (0.807075,0.0147422,0.178183)
+
+Iteration: 3
+Index: 9315 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (3.05399e-05,0.00189353,0.0996387)
+(p0FromRP, p1FromRP, p2FromRP): (0.0101374,0.889709,0.100154)
+Channel information: (0.0030126,0.00212825,0.994859)
+
+Iteration: 3
+Index: 9346 (sys1, sys2):(1,0)
+Decision: (1,1)
+Final (p0, p1, p2): (1.30491e-05,0.00277348,0.542868)
+(p0FromRP, p1FromRP, p2FromRP): (3.82483e-05,0.152601,0.847361)
+Channel information: (0.341168,0.0181748,0.640657)
+
+Iteration: 3
+Index: 9527 (sys1, sys2):(1,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.000410809,0.00981688,0.202486)
+(p0FromRP, p1FromRP, p2FromRP): (0.00320491,0.76105,0.235745)
+Channel information: (0.128181,0.0128991,0.85892)
+
+Iteration: 3
+Index: 9559 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (5.80516e-07,0.000728687,0.791672)
+(p0FromRP, p1FromRP, p2FromRP): (6.39724e-05,0.198037,0.801899)
+Channel information: (0.00907447,0.00367955,0.987246)
+
+Iteration: 3
+Index: 9652 (sys1, sys2):(0,1)
+Decision: (1,1)
+Final (p0, p1, p2): (3.99163e-06,0.000844049,0.164509)
+(p0FromRP, p1FromRP, p2FromRP): (4.92314e-06,0.0577084,0.942287)
+Channel information: (0.810789,0.0146261,0.174585)
+
+Iteration: 3
+Index: 9687 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0654078,0.00432989,0.000229086)
+(p0FromRP, p1FromRP, p2FromRP): (0.0667245,0.91802,0.0152559)
+Channel information: (0.980267,0.00471655,0.0150162)
+
+Iteration: 3
+Index: 9817 (sys1, sys2):(1,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.000266594,0.00785403,0.225854)
+(p0FromRP, p1FromRP, p2FromRP): (0.000450959,0.420672,0.578877)
+Channel information: (0.591171,0.0186702,0.390159)
+
+Iteration: 3
+Index: 9848 (sys1, sys2):(0,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.369108,0.00732857,0.000133283)
+(p0FromRP, p1FromRP, p2FromRP): (0.429323,0.56963,0.00104625)
+Channel information: (0.859743,0.0128655,0.127391)
+
+Iteration: 3
+Index: 9907 (sys1, sys2):(1,0)
+Decision: (0,0)
+Final (p0, p1, p2): (0.0528571,0.00625943,0.000713045)
+(p0FromRP, p1FromRP, p2FromRP): (0.0549716,0.922522,0.0225065)
+Channel information: (0.961533,0.00678513,0.0316817)
+
+Iteration: 3
+Index: 9912 (sys1, sys2):(1,0)
+Decision: (1,1)
+Final (p0, p1, p2): (0.000782302,0.0113084,0.142463)
+(p0FromRP, p1FromRP, p2FromRP): (0.001276,0.612053,0.386671)
+Channel information: (0.613089,0.0184762,0.368435)
+
+Iteration: 3
+Index: 9989 (sys1, sys2):(1,1)
+Decision: (0,0)
+Final (p0, p1, p2): (0.00417449,0.00188973,0.000821393)
+(p0FromRP, p1FromRP, p2FromRP): (0.00420088,0.783662,0.212137)
+Channel information: (0.993717,0.00241141,0.00387199)
+
