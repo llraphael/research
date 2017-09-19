@@ -970,7 +970,7 @@ double deconvolve2(vector<double> &sumpdf, vector<double> &vpdf, double weight, 
 
 	respdf = tmpRes;
 	for(int i=0; i<respdf.size(); i++) {
-		if(isnan(abs(respdf[i])) || isinf(respdf[i]))
+		if(std::isnan(abs(respdf[i])) || std::isinf(respdf[i]))
 			cout << "nan message!" << endl;
 	}
 
@@ -981,7 +981,7 @@ double deconvolve2(vector<double> &sumpdf, vector<double> &vpdf, double weight, 
 		sum += respdf[i];
 	}
 
-	if(isnan(sum) || sum < 0.5)
+	if(std::isnan(sum) || sum < 0.5)
 		cout << "problem!" << endl;
 }
 
@@ -1607,10 +1607,6 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 	int degree = sysNodeInfo1.nodeData.degree;
 	int paraDegree = sysNodeInfo1.nodeData.para_degree;
 
-	/*
-	if(iteration == 3 && index == 141)
-		cout << "Stop and Check!" << endl;
-	*/
 	vector<vector<double> > inPdfMessage(degree);
 	vector<double> inLLR1(paraDegree);
 	vector<double> inLLR2(paraDegree);
@@ -1689,14 +1685,23 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 	double pLDGM1_0 = p0FromCoded1 * (p0Prior * (1 - p) + p1Prior * p) * (channelInfo[2] + channelInfo[3] * p1Prior) * (p0FromRP + p1FromRP * p1Prior);
 	double pLDGM1_1 = p1FromCoded1 * (p1Prior * (1 - p) + p0Prior * p) * (channelInfo[4] + channelInfo[3] * p0Prior) * (p2FromRP + p1FromRP * p0Prior);
 
+	
+	/* // Update LDGM2 without using channel and RP information.
+	double pLDGM2_0 = p0FromCoded2 * (pLDGM1_0 * (1 - p) + pLDGM1_1 * p);
+	double pLDGM2_1 = p1FromCoded2 * (pLDGM1_1 * (1 - p) + pLDGM1_0 * p);
+*/
+
+	// Use message from RP and Channel with LDGM1 pro
 	double pLDGM2_0 = p0FromCoded2 * (pLDGM1_0 * (1 - p) + pLDGM1_1 * p) * (channelInfo[2] + channelInfo[3] * pLDGM1_1) * (p0FromRP + p1FromRP * pLDGM1_1);
 	double pLDGM2_1 = p1FromCoded2 * (pLDGM1_0 * p + pLDGM1_1 * (1 - p)) * (channelInfo[4] + channelInfo[3] * pLDGM1_0) * (p2FromRP + p1FromRP * pLDGM1_0);
+
 	
-	sideInfo[index] = log(pLDGM2_0 / pLDGM2_1);
-	/*
+	/* // Use Message from RP and Channel Unbiased
 	double pLDGM2_0 = p0FromCoded2 * (p0FromCoded1 * (1 - p) + p1FromCoded1 * p) * (channelInfo[2] + 0.5 * channelInfo[3]) * (p0FromRP + 0.5 * p1FromRP);
 	double pLDGM2_1 = p1FromCoded2 * (p1FromCoded1 * (1 - p) + p0FromCoded1 * p) * (channelInfo[4] + 0.5 * channelInfo[3]) * (p2FromRP + 0.5 * p1FromRP);
 	*/
+
+	sideInfo[index] = log(pLDGM2_0 / pLDGM2_1);
 
 	double LLRFinal1 = log(pLDGM1_0 / pLDGM1_1);
 	double LLRFinal2 = log(pLDGM2_0 / pLDGM2_1); 
@@ -1710,7 +1715,7 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 
 		sysNodeInfo1.setMessage(outMessage, i, 2);
 				
-		if(isnan(outMessage))
+		if(std::isnan(outMessage))
 		cout << "Outgoing messages from sys nodes are nan!" << endl;
 	
 		outMessage = LLRFinal2 - inLLR2[i];
@@ -1720,7 +1725,7 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 
 		sysNodeInfo2.setMessage(outMessage, i, 2);
 				
-		if(isnan(outMessage))
+		if(std::isnan(outMessage))
 		cout << "Outgoing messages from sys nodes are nan!" << endl;
 	}
 	/*
@@ -1770,7 +1775,7 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 //
 //		sysNodeInfo1.setMessage(outMessage, i, 2);
 //				
-//		if(isnan(outMessage))
+//		if(std::isnan(outMessage))
 //		cout << "Outgoing messages from sys nodes are nan!" << endl;
 //	
 //		/*		
@@ -1781,7 +1786,7 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 //
 //		sysNodeInfo2.setMessage(outMessage, i, 2);
 //				
-//		if(isnan(outMessage))
+//		if(std::isnan(outMessage))
 //		cout << "Outgoing messages from sys nodes are nan!" << endl;
 //		*/
 //	}
@@ -1796,7 +1801,7 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 //		double denominator1 = exp(-pow(y-2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))) / exp(messageToState);
 //		double denominator2 = (exp(-pow(y, 2) / (2 * pow(sigma, 2))));
 //
-//		if(isinf(nominator1) && isinf(denominator1)) {
+//		if(std::isinf(nominator1) && std::isinf(denominator1)) {
 //			channelLLR[index] = log(exp(-pow(y, 2) / (2 * pow(sigma, 2))) / exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * pow(sigma, 2))));
 //		} else {
 //				channelLLR[index] = log((nominator1 + nominator2) / (denominator1 + denominator2));
@@ -1815,7 +1820,7 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 //
 //			sysNodeInfo2.setMessage(outMessage, i, 2);
 //				
-//			if(isnan(outMessage))
+//			if(std::isnan(outMessage))
 //			cout << "Outgoing messages from sys nodes are nan!" << endl;
 //		}
 //
@@ -1826,7 +1831,7 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 //		denominator1 = exp(-pow(y-2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))) / exp(messageToState);
 //		denominator2 = (exp(-pow(y, 2) / (2 * pow(sigma, 2))));
 //
-//		if(isinf(nominator1) && isinf(denominator1)) {
+//		if(std::isinf(nominator1) && std::isinf(denominator1)) {
 //			channelLLR[index] = log(exp(-pow(y, 2) / (2 * pow(sigma, 2))) / exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * pow(sigma, 2))));
 //		} else {
 //				channelLLR[index] = log((nominator1 + nominator2) / (denominator1 + denominator2));

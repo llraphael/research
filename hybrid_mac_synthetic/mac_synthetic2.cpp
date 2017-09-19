@@ -115,14 +115,15 @@ void horizontalStack(vector<Matrix> &ma, int stacksequen[], int &seed, Matrix &r
 double getSymPdf(vector<double> symbolSet, vector<double> estimate, double candiVal, double norFactor, double y, double sigma);
 int countError(vector<Sys_info> &sysNodeInfo, vector<int> &systrans);
 vector<int> interleaver(vector<int> &source, double percentage, vector<Sys_info> &sysNode, vector<Coded_info> &codedInfo, int codedNoP, int group);
+void updateChannelInfo(vector<complex<double> >& channelSignals, double Esender, double sigma, int start, vector<Coded_info>& codedNodeInfo, vector<double>& codedChannelOutput);
 
 int main() 
 {
    // Source info
   int sysNumber = 10000;
-  int symbolNumber = 10000;
-	int codedNumber = 15000;
-	int sysDegree = 4;
+  int symbolNumber = 5000;
+	int codedNumber = 20000;
+	int sysDegree = 20;
   
   
   double p1 = 0.5;    //sparsity of the source.
@@ -214,9 +215,9 @@ int main()
 	multimap<int, int> onePositionByRow1(maData1[0]);
 	multimap<int, int> onePositionByColumn1(maData1[1]);
 
-	vector<multimap<int, int> > maData2 = paritycm(sysNumber, codedNumber, sysDegree, sysNumber, 2500);
+	vector<multimap<int, int> > maData2 = paritycm(sysNumber, codedNumber, sysDegree, sysNumber, 3000);
 	multimap<int, int> onePositionByRow2(maData2[0]);
-	multimap<int, int> onePositionByColumn2(maData2[0]);
+	multimap<int, int> onePositionByColumn2(maData2[1]);
 
 	// Systematic nodes.
   vector<Sys_info> sysNodeInfo1(sysNumber);
@@ -236,7 +237,7 @@ int main()
     sysNodeInfo2[index].readLinearMatrix(gmatrix1, index, symbolNumber, 1);
   
 		sysNodeInfo1[index].readNeighbourNum(onePositionByRow1, index, 2);
-		sysNodeInfo2[index].readNeighbourNum(onePositionByRow1, index, 2);
+		sysNodeInfo2[index].readNeighbourNum(onePositionByRow2, index, 2);
 	}
 
   for(int index=0;index<symbolNumber;++index) {
@@ -246,7 +247,7 @@ int main()
 
 	for(int index=0; index<codedNumber; ++index) {
 		codedNodeInfo1[index].readNeighbourNum(onePositionByColumn1, index);
-		codedNodeInfo2[index].readNeighbourNum(onePositionByColumn1, index);
+		codedNodeInfo2[index].readNeighbourNum(onePositionByColumn2, index);
 	}
  
 	// Each Sys node get the storage index of its connections.
@@ -306,7 +307,7 @@ int main()
 	vector<double> codedChannelOutput(codedNumber, 0);
 
 	// Channel information.
-	double gap = 10;
+	double gap = 5;
 	double snr = capacity + gap;
   double sigma = sqrt( Eso / (2 * pow(10, snr/10)) ); 
   double noiseVar = pow(sigma, 2);
@@ -540,62 +541,13 @@ int main()
 			for(int i=0; i<codedNumber; i++)
 				codedNodeInfo1[i].computeMessage(sysNodeInfo1, codedChannelOutput[i], 2);
 			
-			for(int i=0; i<codedNumber; i++) {
-				double y;
-				if(i % 2 == 0)
-					y = channelSignals[(sysNumber + symbolNumber + i) / 2].real();
-				else
-					y = channelSignals[(sysNumber + symbolNumber + i) / 2].imag();
-
-				double estimate = codedNodeInfo1[i].message_to_state;
-				double nominator1 = exp(-pow(y,2) / (2*pow(sigma, 2))) / exp(estimate);
-				double nominator2 = (exp(-pow(y+2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))));
-				double denominator1 = exp(-pow(y-2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))) / exp(estimate);
-				double denominator2 = (exp(-pow(y, 2) / (2 * pow(sigma, 2))));
-
-				if(isinf(nominator1) && isinf(denominator1)) {
-					codedChannelOutput[i] = log(exp(-pow(y, 2) / (2 * pow(sigma, 2))) / exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * pow(sigma, 2))));
-				} else {
-					codedChannelOutput[i] = log((nominator1 + nominator2) / (denominator1 + denominator2));
-				}
-
-			}
+			updateChannelInfo(channelSignals, Esender, sigma, sysNumber + symbolNumber, codedNodeInfo1, codedChannelOutput);
 
 			for(int i=0; i<codedNumber; i++)
 				codedNodeInfo2[i].computeMessage(sysNodeInfo2, codedChannelOutput[i], 2);
-	
-			for(int i=0; i<codedNumber; i++) {
-				double y;
-				if(i % 2 == 0)
-					y = channelSignals[(sysNumber + symbolNumber + i) / 2].real();
-				else
-					y = channelSignals[(sysNumber + symbolNumber + i) / 2].imag();
 
-				double estimate = codedNodeInfo1[i].message_to_state;
-				double nominator1 = exp(-pow(y,2) / (2*pow(sigma, 2))) / exp(estimate);
-				double nominator2 = (exp(-pow(y+2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))));
-				double denominator1 = exp(-pow(y-2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))) / exp(estimate);
-				double denominator2 = (exp(-pow(y, 2) / (2 * pow(sigma, 2))));
-
-				if(isinf(nominator1) && isinf(denominator1)) {
-					codedChannelOutput[i] = log(exp(-pow(y, 2) / (2 * pow(sigma, 2))) / exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * pow(sigma, 2))));
-				} else {
-					codedChannelOutput[i] = log((nominator1 + nominator2) / (denominator1 + denominator2));
-				}
-
-			}
-
-			/*
-			for(int i=0; i<sysNumber; i++) {
-				double y = 0;
-				if(i % 2 == 0)
-					y = channelSignals[i/2].real();
-				else
-					y = channelSignals[i/2].imag();
-
-				pdfMessageFromSys[i] = syntheticDecoderSys(sysNodeInfo1[i], sysNodeInfo2[i], pdfMessageFromRP, codedNodeInfo1, codedNodeInfo2, sysChannelOutput[i], sysChannelLLR, sideInfo, y, sigma, p, i, trackRPPro, systrans1[i], systrans2[i], currentTime);
-			}
-			*/
+			updateChannelInfo(channelSignals, Esender, sigma, sysNumber + symbolNumber, codedNodeInfo2, codedChannelOutput);
+		
 			// Count error number.
       double errorbit = 0;
       
@@ -674,6 +626,33 @@ int main()
   error.close();
   erroreachblock.close();
 } 
+
+void updateChannelInfo(vector<complex<double> >& channelSignals, double Esender, double sigma, int start, vector<Coded_info>& codedNodeInfo, vector<double>& codedChannelOutput) {
+	
+	int codedNumber = codedChannelOutput.size();
+
+	for(int i=0; i<codedNumber; i++) {
+				double y;
+				if(i % 2 == 0)
+					y = channelSignals[(start + i) / 2].real();
+				else
+					y = channelSignals[(start + i) / 2].imag();
+
+				double estimate = codedNodeInfo[i].message_to_state;
+				double nominator1 = exp(-pow(y,2) / (2*pow(sigma, 2))) / exp(estimate);
+				double nominator2 = (exp(-pow(y+2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))));
+				double denominator1 = exp(-pow(y-2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))) / exp(estimate);
+				double denominator2 = (exp(-pow(y, 2) / (2 * pow(sigma, 2))));
+
+				if(std::isinf(nominator1) && std::isinf(denominator1)) {
+					codedChannelOutput[i] = log(exp(-pow(y, 2) / (2 * pow(sigma, 2))) / exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * pow(sigma, 2))));
+				} else {
+					codedChannelOutput[i] = log((nominator1 + nominator2) / (denominator1 + denominator2));
+				}
+
+	}
+
+}
 
 vector<int> interleaver(vector<int> &source, double percentage, vector<Sys_info> &sysNode, vector<Coded_info> &codedInfo, int codedNoP, int group)
 {
