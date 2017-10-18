@@ -121,9 +121,9 @@ int main()
 {
    // Source info
   int sysNumber = 10000;
-  int symbolNumber = 5000;
-	int codedNumber = 20000;
-	int sysDegree = 20;
+  int symbolNumber = 10000;
+	int codedNumber = 10000;
+	int sysDegree = 25;
   
   
   double p1 = 0.5;    //sparsity of the source.
@@ -138,7 +138,8 @@ int main()
   double R = (H_U1_givenU2 + H_U2) * codeRate * 2;
   double throughput = codeRate * 2;
   
- 	double capacity = 10 * log10((pow(2, 2 * R) - 1) / (2 * R) * entropy / 2);     // in terms of Eso/N0
+	double capacity = 10 * log10((pow(2, R) - 1) / (4 * codeRate));   // in terms of Eso/N0
+ 	//double capacity = 10 * log10((pow(2, 2 * R) - 1) / (2 * R) * entropy / 2);     // in terms of Eso/N0
 	//double capacity = 10 * log10((pow(2, 2 * R) - 1) / 2);     // Channel capacity in terms of Es/N0.
 
   cout<<"Code rate is: "<<codeRate<<endl;
@@ -274,7 +275,7 @@ int main()
   double Esender = Es / 2;
 	double Es1 = Esender, Es2 = Esender;
 
-  double Eso = Esender / codeRate;
+  double Eso = Es / (4 * codeRate);
 
   cout << "energy per source bit is:" << Eso << endl;
 
@@ -307,7 +308,7 @@ int main()
 	vector<double> codedChannelOutput(codedNumber, 0);
 
 	// Channel information.
-	double gap = 5;
+	double gap = 3;
 	double snr = capacity + gap;
   double sigma = sqrt( Eso / (2 * pow(10, snr/10)) ); 
   double noiseVar = pow(sigma, 2);
@@ -321,8 +322,10 @@ int main()
   int seed = 2000;
 
   ofstream error;
-  //error.open("res_hybrid_w4142_6000_7_01_Rc1_2p3db.txt", ios::out);
-  error.open("test.txt", ios::out);
+  string errorFileName = "mac_hybridsynthetic_w4142_" + std::to_string(static_cast<long long>(symbolNumber)) + "_" +
+		                     std::to_string(static_cast<long long>(codedNumber)) + "_" + std::to_string(static_cast<long long>(sysDegree)) +
+		                     "_p" + std::to_string(static_cast<long long>(p)) + "_" + std::to_string(static_cast<long long>(gap)) + "db.txt";
+	error.open("test.txt", ios::out);
 
   ofstream erroreachblock;
   //erroreachblock.open("err_m4_2500_5_001_t10_2p5db.txt", ios::out);
