@@ -70,7 +70,7 @@ Matrix linearMatrixConsD8(int N, vector<int> &weight, int seed)
 			     {1, 0} };
   */
 
- 	/* 
+	/*	 
   //For weightset size of 8
   int horizontalseq[][4] = { {2, 3, 1, 0},
 			     {1, 0, 2, 3},
@@ -78,12 +78,18 @@ Matrix linearMatrixConsD8(int N, vector<int> &weight, int seed)
 			     {0, 1, 3, 2} };
   */
   
-  //For weightset size of 16
+  //For weightset size of 16 
+  /*
    int horizontalseq[][8] = { {7, 6, 5, 4, 3, 2, 1, 0},
 			     {3, 2, 1, 0, 7, 6, 5, 4},
 			     {7, 6, 5, 4, 3, 2, 1, 0},
 			     {3, 2, 1, 0, 7, 6, 5, 4} };
-  
+  */
+	int horizontalseq[][8] = { {7, 3, 6, 2, 5, 1, 4, 0},
+			     {0, 4, 1, 5, 2, 6, 3, 7},
+			     {4, 3, 5, 2, 6, 0, 7, 1},
+			     {2, 6, 3, 7, 0, 5, 1, 4} };
+	
   //Four row elementary matrices group forms a whole matrix
   Matrix matrixhori[4]; 
 
@@ -93,7 +99,6 @@ Matrix linearMatrixConsD8(int N, vector<int> &weight, int seed)
   Matrix finalmatrix = matrixhori[0];
   for(int i=1;i<4;++i)
     finalmatrix.matrixStackDown(matrixhori[i]);
-
 
   return finalmatrix;
 
@@ -124,7 +129,7 @@ int main()
 	//return 1;
    // Source info
   int sysNumber = 10000;
-  int symbolNumber = 25000;
+  int symbolNumber = 20000;
 	
   double p1 = 0.5;    //sparsity of the source.
   double p0 = 1 - p1;
@@ -134,11 +139,11 @@ int main()
 	double H_U2 = 1;
 	double entropy = H_U1_givenU2 + H_U2;
 	
-  double codeRate = double(sysNumber) / (sysNumber + symbolNumber);
-  double R = (H_U1_givenU2 + H_U2) * codeRate * 2;
-  double throughput = codeRate * 2;
+	double codeRate = double(sysNumber) / (sysNumber + symbolNumber);
+	double R = (H_U1_givenU2 + H_U2) * codeRate * 2;
+	double throughput = codeRate * 2;
   
- 	double capacity = 10 * log10((pow(2, 2 * R) - 1) / (2 * R) * entropy / 2);     // in terms of Eso/N0
+	double capacity = 10 * log10((pow(2, R) - 1) / (4 * codeRate));   // in terms of Eso/N0
 	//double capacity = 10 * log10((pow(2, 2 * R) - 1) / 2);     // Channel capacity in terms of Es/N0.
 
   cout<<"Code rate is: "<<codeRate<<endl;
@@ -149,7 +154,7 @@ int main()
 
   //weightset
   int wval[] = {1, 1, 1, 1, 2, 2, 2, 2};
-  //int wval[] = {2, 3, 4, 8};
+  //int wval[] = {2, 3, 7, 10};
   //int wval[] = {1, 2};
   int weightSize = 2 * sizeof(wval) / sizeof(int);
   vector<double> weightset(weightSize, 0);
@@ -189,8 +194,8 @@ int main()
 	// possbile values of synthetic nodes, which is the sum of two RP symbol
 	// values.
 	set<int> symSumSet;
-  for(int i=0; i<symbolset.size(); i++) {
-    for(int j=0; j<symbolset.size(); j++) {
+	for(int i=0; i<symbolset.size(); i++) {
+		for(int j=0; j<symbolset.size(); j++) {
 			symSumSet.insert(symbolset[i] + symbolset[j]);
 		}
 	}
@@ -209,6 +214,13 @@ int main()
       Matrix gmatrix0 = linearMatrixConsD8(sysNumber, weightval, gmatrixSeed++);
       gmatrix1.matrixStackDown(gmatrix0);
     }
+
+	Matrix gmatrix2 = linearMatrixConsD8(sysNumber, weightval, gmatrixSeed++);
+	for(int i=0;i<G0Num;++i) {
+		Matrix gmatrix0 = linearMatrixConsD8(sysNumber, weightval, gmatrixSeed++);
+		gmatrix2.matrixStackDown(gmatrix0);
+    }
+
 
   	// Systematic nodes.
   vector<Sys_info> sysNodeInfo1(sysNumber);
@@ -243,15 +255,14 @@ int main()
 
 
 	// Calculate the average value of transimitted symbols
-  double Es = 2;
-  double Esender = Es / 2;
+	double Es = 2;
+	double Esender = Es / 2;
 	double Es1 = Esender, Es2 = Esender;
 
-  double Eso = Esender / codeRate;
+	double Eso = Es / (4 * codeRate);
 
-  cout << "energy per source bit is:" << Eso << endl;
+	cout << "energy per source bit is:" << Eso << endl;
 
- 
   // Start to generate sys bits and transmitted symbols
   vector<int> systematicBits1(sysNumber, 0);
   vector<int> systematicBits2(sysNumber, 0);
@@ -274,26 +285,25 @@ int main()
 	vector<vector<double> > sysChannelOutput(sysNumber, vector<double>(5, 0));  
 
 	// Channel information.
-	double gap = 7;
+	double gap = 1;
 	double snr = capacity + gap;
-  double sigma = sqrt( Eso / (2 * pow(10, snr/10)) ); 
-  double noiseVar = pow(sigma, 2);
+	double sigma = sqrt( Eso / (2 * pow(10, snr/10)) ); 
+	double noiseVar = pow(sigma, 2);
 
 	cout << "Gap to the limit is: " << gap << endl;
 	cout << "SNR is: " << snr << endl;
 
 	// Calculate accumulated ber over blocks.
-  double bersum = 0;
-  
-  int seed = 2000;
+	double bersum = 0;
+  	int seed = 2000;
+	
+	ofstream error;
+	//error.open("res_hybrid_w4142_6000_7_01_Rc1_2p3db.txt", ios::out);
+	error.open("test.txt", ios::out);
 
-  ofstream error;
-  //error.open("res_hybrid_w4142_6000_7_01_Rc1_2p3db.txt", ios::out);
-  error.open("test.txt", ios::out);
-
-  ofstream erroreachblock;
-  //erroreachblock.open("err_m4_2500_5_001_t10_2p5db.txt", ios::out);
-  erroreachblock.open("test1.txt", ios::out);
+	ofstream erroreachblock;
+	//erroreachblock.open("err_m4_2500_5_001_t10_2p5db.txt", ios::out);
+	erroreachblock.open("test1.txt", ios::out);
 
   vector<double> error_record;
   double error_min = sysNumber;

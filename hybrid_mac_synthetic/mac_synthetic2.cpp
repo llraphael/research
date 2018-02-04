@@ -1,4 +1,6 @@
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 #include <vector>
 #include <map>
 #include <set>
@@ -79,11 +81,17 @@ Matrix linearMatrixConsD8(int N, vector<int> &weight, int seed)
   */
   
   //For weightset size of 16
-   int horizontalseq[][8] = { {7, 6, 5, 4, 3, 2, 1, 0},
+  /*
+  int horizontalseq[][8] = { {7, 6, 5, 4, 3, 2, 1, 0},
 			     {3, 2, 1, 0, 7, 6, 5, 4},
 			     {7, 6, 5, 4, 3, 2, 1, 0},
 			     {3, 2, 1, 0, 7, 6, 5, 4} };
-  
+ */
+  int horizontalseq[][8] = { {7, 3, 6, 2, 5, 1, 4, 0},
+			     {0, 4, 1, 5, 2, 6, 3, 7},
+			     {4, 3, 5, 2, 6, 0, 7, 1},
+			     {2, 6, 3, 7, 0, 5, 1, 4} };
+	 
   //Four row elementary matrices group forms a whole matrix
   Matrix matrixhori[4]; 
 
@@ -93,7 +101,6 @@ Matrix linearMatrixConsD8(int N, vector<int> &weight, int seed)
   Matrix finalmatrix = matrixhori[0];
   for(int i=1;i<4;++i)
     finalmatrix.matrixStackDown(matrixhori[i]);
-
 
   return finalmatrix;
 
@@ -117,30 +124,28 @@ int countError(vector<Sys_info> &sysNodeInfo, vector<int> &systrans);
 vector<int> interleaver(vector<int> &source, double percentage, vector<Sys_info> &sysNode, vector<Coded_info> &codedInfo, int codedNoP, int group);
 void updateChannelInfo(vector<complex<double> >& channelSignals, double Esender, double sigma, int start, vector<Coded_info>& codedNodeInfo, vector<double>& codedChannelOutput);
 
-int main() 
-{
-   // Source info
+int main() {
+  // Source info
   int sysNumber = 10000;
-  int symbolNumber = 10000;
-	int codedNumber = 10000;
-	int sysDegree = 25;
-  
+  int symbolNumber = 8000;
+  int codedNumber = 12000;
+  int sysDegree = 25;
   
   double p1 = 0.5;    //sparsity of the source.
   double p0 = 1 - p1;
   double p = 0.01; // correlation between source 1 and source 2.
 
-	double H_U1_givenU2 = -p*log2(p) - (1 - p) * log2(1 - p);
-	double H_U2 = 1;
-	double entropy = H_U1_givenU2 + H_U2;
+  double H_U1_givenU2 = -p*log2(p) - (1 - p) * log2(1 - p);
+  double H_U2 = 1;
+  double entropy = H_U1_givenU2 + H_U2;
 	
   double codeRate = double(sysNumber) / (sysNumber + symbolNumber + codedNumber);
   double R = (H_U1_givenU2 + H_U2) * codeRate * 2;
   double throughput = codeRate * 2;
   
-	double capacity = 10 * log10((pow(2, R) - 1) / (4 * codeRate));   // in terms of Eso/N0
- 	//double capacity = 10 * log10((pow(2, 2 * R) - 1) / (2 * R) * entropy / 2);     // in terms of Eso/N0
-	//double capacity = 10 * log10((pow(2, 2 * R) - 1) / 2);     // Channel capacity in terms of Es/N0.
+  double capacity = 10 * log10((pow(2, R) - 1) / (4 * codeRate));   // in terms of Eso/N0
+  //double capacity = 10 * log10((pow(2, 2 * R) - 1) / (2 * R) * entropy / 2);     // in terms of Eso/N0
+  //double capacity = 10 * log10((pow(2, 2 * R) - 1) / 2);     // Channel capacity in terms of Es/N0.
 
   cout<<"Code rate is: "<<codeRate<<endl;
   cout<<"entropy is: "<<entropy<<endl;
@@ -175,10 +180,10 @@ int main()
   
 	map<double, double>::iterator it = symbolsetdata.begin();
 
-	for(it; it!=symbolsetdata.end(); ++it) {
+	for(; it!=symbolsetdata.end(); ++it) {
       symbolset.push_back( it->first ); 
       symbolpro.push_back( it->second );
-  }
+	}
   
   double symbol_entropy = 0;
   for(int i=0;i<symbolpro.size();++i)
@@ -212,11 +217,12 @@ int main()
     }
 
   // Generate two different LDGM generator matrices.
-	vector<multimap<int, int> > maData1 = paritycm(sysNumber, codedNumber, sysDegree, sysNumber, 1500);
+	vector<multimap<int, int> > maData1 = paritycm(sysNumber, codedNumber, sysDegree, sysNumber, 2750);
 	multimap<int, int> onePositionByRow1(maData1[0]);
 	multimap<int, int> onePositionByColumn1(maData1[1]);
 
-	vector<multimap<int, int> > maData2 = paritycm(sysNumber, codedNumber, sysDegree, sysNumber, 3000);
+	vector<multimap<int, int> > maData2 = paritycm(sysNumber, codedNumber, sysDegree, sysNumber, 3350);
+
 	multimap<int, int> onePositionByRow2(maData2[0]);
 	multimap<int, int> onePositionByColumn2(maData2[1]);
 
@@ -226,25 +232,25 @@ int main()
   
 	// RCM nodes.
 	vector<Coded_info> symNodeInfo1(symbolNumber);
-  vector<Coded_info> symNodeInfo2(symbolNumber);
+	vector<Coded_info> symNodeInfo2(symbolNumber);
 
 	// Coded nodes.
 	vector<Coded_info> codedNodeInfo1(codedNumber);
 	vector<Coded_info> codedNodeInfo2(codedNumber);
 
-  gmatrix1.organizebyCol();
-  for(int index=0;index<sysNumber;++index) {
-    sysNodeInfo1[index].readLinearMatrix(gmatrix1, index, symbolNumber, 1);
-    sysNodeInfo2[index].readLinearMatrix(gmatrix1, index, symbolNumber, 1);
+	gmatrix1.organizebyCol();
+	for(int index=0;index<sysNumber;++index) {
+		sysNodeInfo1[index].readLinearMatrix(gmatrix1, index, symbolNumber, 1);
+    	sysNodeInfo2[index].readLinearMatrix(gmatrix1, index, symbolNumber, 1);
   
 		sysNodeInfo1[index].readNeighbourNum(onePositionByRow1, index, 2);
 		sysNodeInfo2[index].readNeighbourNum(onePositionByRow2, index, 2);
 	}
 
-  for(int index=0;index<symbolNumber;++index) {
-    symNodeInfo1[index].readLinearMatrix(gmatrix1, index);
-    symNodeInfo2[index].readLinearMatrix(gmatrix1, index);
-  }
+  	for(int index=0;index<symbolNumber;++index) {
+		symNodeInfo1[index].readLinearMatrix(gmatrix1, index);
+		symNodeInfo2[index].readLinearMatrix(gmatrix1, index);
+  	}
 
 	for(int index=0; index<codedNumber; ++index) {
 		codedNodeInfo1[index].readNeighbourNum(onePositionByColumn1, index);
@@ -271,18 +277,17 @@ int main()
  
 
 	// Calculate the average value of transimitted symbols
-  double Es = 2;
-  double Esender = Es / 2;
+	double Es = 2;
+	double Esender = Es / 2;
 	double Es1 = Esender, Es2 = Esender;
 
-  double Eso = Es / (4 * codeRate);
+ 	double Eso = Es / (4 * codeRate);
 
-  cout << "energy per source bit is:" << Eso << endl;
+	cout << "energy per source bit is:" << Eso << endl;
 
- 
-  // Start to generate sys bits and transmitted symbols
-  vector<int> systematicBits1(sysNumber, 0);
-  vector<int> systematicBits2(sysNumber, 0);
+ 	// Start to generate sys bits and transmitted symbols
+	vector<int> systematicBits1(sysNumber, 0);
+	vector<int> systematicBits2(sysNumber, 0);
 	vector<int> codedBits1(codedNumber, 0);
 	vector<int> codedBits2(codedNumber, 0);
   vector<double> rpsymbols1(symbolNumber, 0);
@@ -308,7 +313,7 @@ int main()
 	vector<double> codedChannelOutput(codedNumber, 0);
 
 	// Channel information.
-	double gap = 3;
+	double gap = 1;
 	double snr = capacity + gap;
   double sigma = sqrt( Eso / (2 * pow(10, snr/10)) ); 
   double noiseVar = pow(sigma, 2);
@@ -322,9 +327,16 @@ int main()
   int seed = 2000;
 
   ofstream error;
+  stringstream stream1;
+  stream1 << fixed << setprecision(2) << p;
+  string pString = stream1.str();
+
+  stringstream stream2;
+  stream2 << fixed << setprecision(2) << gap;
+  string gapString = stream2.str();
   string errorFileName = "mac_hybridsynthetic_w4142_" + std::to_string(static_cast<long long>(symbolNumber)) + "_" +
 		                     std::to_string(static_cast<long long>(codedNumber)) + "_" + std::to_string(static_cast<long long>(sysDegree)) +
-		                     "_p" + std::to_string(static_cast<long long>(p)) + "_" + std::to_string(static_cast<long long>(gap)) + "db.txt";
+		                     "_p" + pString + "_" + gapString + "db.txt";
 	error.open("test.txt", ios::out);
 
   ofstream erroreachblock;
@@ -375,7 +387,7 @@ int main()
       if(random < sysDiffThreshold) {
 				systematicBits2[i] = 1 ^ systematicBits1[i];
 				count++;
-			}
+		}
       else
 				systematicBits2[i] = systematicBits1[i];
     }
@@ -395,24 +407,24 @@ int main()
 		encoder(codedNodeInfo2, systematicBits2, codedBits2);
 
 		// Interleaver
-		//interleaver(codedBits1, 1, sysNodeInfo1, codedNodeInfo1, codedNumber, 2);
+		interleaver(codedBits1, 0.7, sysNodeInfo1, codedNodeInfo1, codedNumber, 2);
 
     // Channel symbol
     vector<complex<double> > channelSignals;
     
     // Generate channel symbol for systematic bits. Notice that we for sender i,
-		// we have to satisfy the requirement that the average energy is Es_i, which
-		// is 1 here, for conveniece.
+    // we have to satisfy the requirement that the average energy is Es_i, which
+    // is 1 here, for conveniece.
     for(int i=0; i<sysNumber; i=i+2) {
-    	double tempAX = (2 * systematicBits1[i] - 1) / sqrt(2) * sqrt(Es1);
-			double tempAY = (2 * systematicBits1[i+1] - 1) / sqrt(2) * sqrt(Es1);
-			complex<double> digitSignalA = complex<double>(tempAX, tempAY);
+      double tempAX = (2 * systematicBits1[i] - 1) / sqrt(2) * sqrt(Es1);
+      double tempAY = (2 * systematicBits1[i+1] - 1) / sqrt(2) * sqrt(Es1);
+      complex<double> digitSignalA = complex<double>(tempAX, tempAY);
 
-			double tempBX = (2 * systematicBits2[i] - 1) / sqrt(2) * sqrt(Es2);
-			double tempBY = (2 * systematicBits2[i+1] - 1) / sqrt(2) * sqrt(Es2);
-			complex<double> digitSignalB = complex<double>(tempBX, tempBY);
+      double tempBX = (2 * systematicBits2[i] - 1) / sqrt(2) * sqrt(Es2);
+      double tempBY = (2 * systematicBits2[i+1] - 1) / sqrt(2) * sqrt(Es2);
+      complex<double> digitSignalB = complex<double>(tempBX, tempBY);
       channelSignals.push_back(digitSignalA + digitSignalB);
-		} 
+    } 
 
     // Generate channel symbol for RP symbol, QAM. Since normalized RP symbol point energy is 1 and now each assigned point energy
     // is Es/2, normalized factor should be adjusted.
@@ -421,17 +433,17 @@ int main()
     for(int i=0; i<tempChannelSignals1.size(); i++)
       channelSignals.push_back(tempChannelSignals1[i] + tempChannelSignals2[i]);
     
-		// Generate channel symbols for coded bits. The process is the same as that in systematic bits.
-		for(int i=0; i<codedNumber; i=i+2) {
-			double tempAX = (2 * codedBits1[i] - 1) / sqrt(2) * sqrt(Es1);
-			double tempAY = (2 * codedBits1[i+1] - 1) / sqrt(2) * sqrt(Es1);
-			complex<double> digitSignalA = complex<double>(tempAX, tempAY);
+    // Generate channel symbols for coded bits. The process is the same as that in systematic bits.
+    for(int i=0; i<codedNumber; i=i+2) {
+      double tempAX = (2 * codedBits1[i] - 1) / sqrt(2) * sqrt(Es1);
+      double tempAY = (2 * codedBits1[i+1] - 1) / sqrt(2) * sqrt(Es1);
+      complex<double> digitSignalA = complex<double>(tempAX, tempAY);
 
-			double tempBX = (2 * codedBits2[i] - 1) / sqrt(2) * sqrt(Es2);
-			double tempBY = (2 * codedBits2[i+1] - 1) / sqrt(2) * sqrt(Es2);
-			complex<double> digitSignalB = complex<double>(tempBX, tempBY);
+      double tempBX = (2 * codedBits2[i] - 1) / sqrt(2) * sqrt(Es2);
+      double tempBY = (2 * codedBits2[i+1] - 1) / sqrt(2) * sqrt(Es2);
+      complex<double> digitSignalB = complex<double>(tempBX, tempBY);
       channelSignals.push_back(digitSignalA + digitSignalB);
-		}
+    }
 
     // Send symbols through complex AWGN channel
     complexAWGNChannel(channelSignals, sigma);                 
@@ -446,9 +458,9 @@ int main()
 				y = channelSignals[index/2].imag();
 
       // 0,0 --> -2; 0, 1 or 1, 0 --> 0; 1, 1 --> 2.
-			double pSumM2 =  gaussianFunc(y, (-2) / sqrt(2) * sqrt(Esender), sigma);            
-      double pSum0 = gaussianFunc(y, 0, sigma);    
-      double pSum2 = gaussianFunc(y, 2 / sqrt(2) * sqrt(Esender), sigma);     
+	double pSumM2 =  gaussianFunc(y, (-2) / sqrt(2) * sqrt(Esender), sigma);            
+	double pSum0 = gaussianFunc(y, 0, sigma);    
+	double pSum2 = gaussianFunc(y, 2 / sqrt(2) * sqrt(Esender), sigma);     
 
 			sysChannelOutput[index] = vector<double> {0, 0, pSumM2, pSum0, pSum2};
 			vecNorm(sysChannelOutput[index]);
