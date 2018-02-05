@@ -876,7 +876,7 @@ void Sys_info::clearMessage()
 }
 
 
-void Sys_info::computeMessage(std::vector<Coded_info> &neiNode, double initialInfo, int group)
+void Sys_info::computeMessage(std::vector<Coded_info> &neiNode, double channelInfo, double sideInfo, int group)
 {
 
   int degree=nodeData.degree;
@@ -903,7 +903,7 @@ void Sys_info::computeMessage(std::vector<Coded_info> &neiNode, double initialIn
 	inmessage[index] = message;
       }
   }  
-  double v=initialInfo;
+  double v = channelInfo + sideInfo;
   for(int index=0;index<degree;++index)
     v += inmessage[index];
   
@@ -922,7 +922,8 @@ void Sys_info::computeMessage(std::vector<Coded_info> &neiNode, double initialIn
     }
 
   //make decision for the node
-  llrEstimation=v;
+  llrEstimation = v;
+  message_to_state = v - channelInfo;
 
   if(v>0)
     decision=0;

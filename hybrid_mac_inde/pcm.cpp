@@ -1,10 +1,12 @@
 /* Generate random matrix with desired degrees, regular or irregular*/
+
 #include <iostream>
 #include <map>
 #include "stdlib.h"
 #include <time.h>
 
 using namespace std;
+
 
 void scrambleArray(vector<int> &arr, int seed) {
   int len = arr.size();
@@ -143,10 +145,10 @@ vector<multimap<int, int> > paritycm(int sysNo,int codedNo,int sysDegree, int nu
 
 		// Generate all the needed column positions at once for the current row.    
 		for(int index=0;index < rowConstraint[row];++index) {
-			colIndex = rand() % colRemain;   //random a column postion in available columns
-			colStoreEachRow.push_back(availColumn[colIndex]); 
-			swap(availColumn[colIndex], availColumn[colRemain-1]);
-			--colRemain;
+	  	colIndex = rand() % colRemain;   //random a column postion in available columns
+	  	colStoreEachRow.push_back(availColumn[colIndex]); 
+	  	swap(availColumn[colIndex], availColumn[colRemain-1]);
+      --colRemain;
 		}
       
     for(int index=0;index < rowConstraint[row];++index) {
@@ -164,7 +166,7 @@ vector<multimap<int, int> > paritycm(int sysNo,int codedNo,int sysDegree, int nu
 					columnFull.push_back(candidColumn);
 	      }
 	   	} 
-	}//for column iteration
+		}//for column iteration
          
     // if the column number is right,store it as a position
     for(int i=0;i<colStoreEachRow.size();++i) {

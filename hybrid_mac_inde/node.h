@@ -129,7 +129,7 @@ class Sys_info {
 
  public:
 
-  void computeMessage(std::vector<Coded_info> &neiNode, double initialInfo, int group = 1);  //for single ldgm
+  void computeMessage(std::vector<Coded_info> &neiNode, double channelInfo, double sideInfo, int group = 1);  //for single ldgm
   void computeMessage(std::vector<Coded_info> &neiNode1, std::vector<Coded_info> &neiNode2, double channelInfo, double sideInfo); //for parallel ldgm
   void computeInMeanAndVar(std::vector<Coded_info> &neiNode1, std::vector<Coded_info> &neiNode2, double p0);
 

@@ -113,7 +113,7 @@ int main()
   int sysNumber = 10000;
   int symbolNumber = 10000;
   int codedNumber = 10000;
-  int sysDegree = 25;
+  int sysDegree = 30;
   
   
   double p1 = 0.5;    //sparsity of the source.
@@ -187,7 +187,7 @@ int main()
   }
 
   // Generate two different LDGM generator matrices.
-  vector<multimap<int, int> > maData1 = paritycm(sysNumber, codedNumber, sysDegree, sysNumber, 2750);
+  vector<multimap<int, int> > maData1 = paritycm(sysNumber, codedNumber, sysDegree, sysNumber, 2650);
   multimap<int, int> onePositionByRow1(maData1[0]);
   multimap<int, int> onePositionByColumn1(maData1[1]);
 
@@ -272,7 +272,7 @@ int main()
 
 
   // Channel condition.
-  double gap = 2;
+  double gap = 5;
   double snr = capacity + gap;
   double sigma = sqrt( Eso / (2 * pow(10, snr/10)) ); 
   double noiseVar = pow(sigma, 2);
@@ -430,7 +430,7 @@ int main()
     
     // side information
     vector<double> sideInfo(sysNumber, 0);
-    double csiThreshold = 0;
+    double csiThreshold = 20;
  
     int iterationtime = 200;
     int currenttime =0;  
@@ -486,12 +486,12 @@ int main()
         double denominator_ele1 = exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * noiseVar)) / exp(estimate);
         double denominator_ele2 = (exp(-pow(y,2)/(2 * noiseVar)));
 
-        if( isinf(nominator_ele1) && isinf (denominator_ele1) ) 
+        if( std::isinf(nominator_ele1) && std::isinf (denominator_ele1) ) 
           codedChannelOutput[index] = log( exp(-pow(y,2)/(2 * noiseVar)) / exp(-pow(y-2 /sqrt(2) * sqrt(Esender), 2)/(2 * noiseVar)));
         else
           codedChannelOutput[index] = log((nominator_ele1+nominator_ele2) / (denominator_ele1+denominator_ele2));
 
-        if( isnan(codedChannelOutput[index]) || isinf(codedChannelOutput[index]) ) 
+        if( std::isnan(codedChannelOutput[index]) || std::isinf(codedChannelOutput[index]) ) 
             cout<<"sys channel message not a number!"<<endl;
       }
 
@@ -508,20 +508,20 @@ int main()
         double denominator_ele1 = exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * noiseVar)) / exp(estimate);
         double denominator_ele2 = (exp(-pow(y,2)/(2 * noiseVar)));
 
-        if( isinf(nominator_ele1) && isinf(denominator_ele1) ) 
+        if( std::isinf(nominator_ele1) && std::isinf(denominator_ele1) ) 
           sysChannelOutput[index] = log(exp(-pow(y, 2)/(2 * noiseVar)) / exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * noiseVar)));
         else
           sysChannelOutput[index] = log((nominator_ele1+nominator_ele2) / (denominator_ele1+denominator_ele2));
 
-        if( isnan(sysChannelOutput[index]) || isinf(sysChannelOutput[index]) ) 
+        if( std::isnan(sysChannelOutput[index]) || std::isinf(sysChannelOutput[index]) ) 
             cout<<"sys channel message not a number!"<<endl;
       }
-
+      
       // Correlation link
       for(int index=0; index<sysNumber; index++) {
         double x = exp(sysNodeInfo1[index].llrEstimation);
         
-        if( isinf(x) )
+        if( std::isinf(x) )
           x = log( (1-p)/p );
         else
           x = log((1 + (1 - p) / p * x) / (x + (1 - p) / p));
@@ -529,7 +529,7 @@ int main()
         if(abs(x) >= csiThreshold)
           sideInfo[index] = x > 0 ? csiThreshold : -csiThreshold;
         
-        if( isnan(sideInfo[index]) || isinf(sideInfo[index]) )
+        if( std::isnan(sideInfo[index]) || std::isinf(sideInfo[index]) )
             cout<<"side info2 wrong!"<<endl;    
       }
     
@@ -577,12 +577,12 @@ int main()
         double denominator_ele1 = exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * noiseVar)) / exp(estimate);
         double denominator_ele2 = (exp(-pow(y,2)/(2 * noiseVar)));
 
-        if( isinf(nominator_ele1) && isinf (denominator_ele1) ) 
+        if( std::isinf(nominator_ele1) && std::isinf (denominator_ele1) ) 
           codedChannelOutput[index] = log( exp(-pow(y,2)/(2 * noiseVar)) / exp(-pow(y-2 /sqrt(2) * sqrt(Esender), 2)/(2 * noiseVar)));
         else
           codedChannelOutput[index] = log((nominator_ele1+nominator_ele2) / (denominator_ele1+denominator_ele2));
 
-        if( isnan(codedChannelOutput[index]) || isinf(codedChannelOutput[index]) ) 
+        if( std::isnan(codedChannelOutput[index]) || std::isinf(codedChannelOutput[index]) ) 
             cout<<"sys channel message not a number!"<<endl;
       }
 
@@ -599,12 +599,12 @@ int main()
         double denominator_ele1 = exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * noiseVar)) / exp(estimate);
         double denominator_ele2 = (exp(-pow(y,2)/(2 * noiseVar)));
 
-        if( isinf(nominator_ele1) && isinf(denominator_ele1) ) 
+        if( std::isinf(nominator_ele1) && std::isinf(denominator_ele1) ) 
           sysChannelOutput[index] = log(exp(-pow(y, 2)/(2 * noiseVar)) / exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * noiseVar)));
         else
           sysChannelOutput[index] = log((nominator_ele1+nominator_ele2) / (denominator_ele1+denominator_ele2));
 
-        if( isnan(sysChannelOutput[index]) || isinf(sysChannelOutput[index]) ) 
+        if( std::isnan(sysChannelOutput[index]) || std::isinf(sysChannelOutput[index]) ) 
             cout<<"sys channel message not a number!"<<endl;
       }
 
@@ -612,7 +612,7 @@ int main()
       for(int index=0; index<sysNumber; index++) {
         double x = exp(sysNodeInfo2[index].llrEstimation);
         
-        if( isinf(x) )
+        if( std::isinf(x) )
           x = log( (1-p)/p );
         else
           x = log((1 + (1 - p) / p * x) / (x + (1 - p) / p));
@@ -620,10 +620,9 @@ int main()
         if(abs(x) >= csiThreshold)
           sideInfo[index] = x > 0 ? csiThreshold : -csiThreshold;
         
-        if( isnan(sideInfo[index]) || isinf(sideInfo[index]) )
+        if( std::isnan(sideInfo[index]) || std::isinf(sideInfo[index]) )
             cout<<"side info2 wrong!"<<endl;    
       }
-
 
       // Count error number.
       double errorbit = 0;
