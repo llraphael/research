@@ -1,4 +1,5 @@
 #include<iostream>
+#include<fstream>
 #include<cmath>
 #include<stdlib.h>
 #include<math.h>
@@ -129,7 +130,7 @@ vector<complex<double> > modulatorQAM(vector<double> &symbols, double norfactor)
   
 }
 
-map<double, double> getSymbolSet(vector<double> &weightset, const double p1, double zeroProcess)
+map<int, double> getSymbolSet(vector<double> &weightset, const double p1, double zeroProcess)
 {
 
   int weightsize = weightset.size();
@@ -174,7 +175,8 @@ map<double, double> getSymbolSet(vector<double> &weightset, const double p1, dou
     ++i;
   }
 
-  vector<double> symbol, procal;
+  vector<int> symbol;
+  vector<double> procal;
   for(i=0;i<symbolset.size();++i)
     {
       int j = 0;
@@ -196,13 +198,11 @@ map<double, double> getSymbolSet(vector<double> &weightset, const double p1, dou
   
   vecNorm(procal);                               // Normalize the distribution of symbols.
 
-  map<double, double> symboldata;
+  map<int, double> symboldata;
   for(i=0;i<symbol.size();++i)
-    symboldata.insert( pair<double, double>(symbol[i], procal[i]) );
+    symboldata.insert( pair<int, double>(symbol[i], procal[i]) );
 
   return symboldata;
-
-
 }
 
 map<int, vector<vector<int> > > getMappingTable(vector<double> &weightSet, int zeroProcess) {
@@ -847,33 +847,33 @@ double deconvolve(vector<double> &sumpdf, vector<double> &vpdf, double weight, v
   if(vpdf[1] > vpdf[2]) {
     if(w > 0) {
       for(int i = 0; i < sumpdf.size(); i++) {
-	if(i - w < 0)
-	  respdf[i] = sumpdf[i] / vpdf[1];
-	else
-	  respdf[i] = (sumpdf[i] - respdf[i - w] * vpdf[2]) / vpdf[1];
+				if(i - w < 0)
+	  			respdf[i] = sumpdf[i] / vpdf[1];
+				else
+	  			respdf[i] = (sumpdf[i] - respdf[i - w] * vpdf[2]) / vpdf[1];
       } 
     } else {
       for(int i = sumpdf.size() - 1; i >= 0; i--) {
-	if(i - w >= sumpdf.size())
-	  respdf[i] = sumpdf[i]  / vpdf[1];
-	else
-	  respdf[i] = (sumpdf[i] - respdf[i - w] * vpdf[2]) / vpdf[1];
+				if(i - w >= sumpdf.size())
+	  			respdf[i] = sumpdf[i]  / vpdf[1];
+				else
+	  			respdf[i] = (sumpdf[i] - respdf[i - w] * vpdf[2]) / vpdf[1];
       }
     }
   } else {
     if(w > 0) {
       for(int i = sumpdf.size() - 1; i >= 0; i--) {
-	if(i + w >= sumpdf.size())
-	  respdf[i] = 0;
-	else
-	  respdf[i] = (sumpdf[i + w] - respdf[i + w] * vpdf[1]) / vpdf[2];
+				if(i + w >= sumpdf.size())
+	  			respdf[i] = 0;
+				else
+	  			respdf[i] = (sumpdf[i + w] - respdf[i + w] * vpdf[1]) / vpdf[2];
       }
     } else {
       for(int i = 0; i < sumpdf.size(); i++) {
-	if(i + w < 0)
-	  respdf[i] = 0;
-	else
-	  respdf[i] = (sumpdf[i + w] - respdf[i + w] * vpdf[1]) / vpdf[2];
+				if(i + w < 0)
+	  			respdf[i] = 0;
+				else
+	  			respdf[i] = (sumpdf[i + w] - respdf[i + w] * vpdf[1]) / vpdf[2];
       }
     }
   }
@@ -887,6 +887,103 @@ double deconvolve(vector<double> &sumpdf, vector<double> &vpdf, double weight, v
   vecNorm(respdf);
 }
 
+double deconvolve2(vector<double> &sumpdf, vector<double> &vpdf, double weight, vector<double> &respdf) {
+ 
+ 	vector<double> tmpRes = vector<double>(sumpdf.size());
+  
+  int w = weight;
+	
+	int zeroPoint = 2;
+
+	double threshold = pow(10, -9);
+	// Depends on w is positive or negative, the update direction is quite different. If we look at the 
+	// equation carefully: P(Y = a) = P(X = a) * P(x1 = 0) + P(X = a - w1) * P(x1 = 1) + P(X = a - 2w1) * P(x1 = 2).
+  
+	// P(r = a) = (P(Y = a) - P(r = a - w1) * P(x1 = 1) - 
+	//            P(r = a - 2 * w1) * P(x1 = 2)) / P(x1 = 0)
+	if(vpdf[2] > vpdf[4]) {
+		if(w > 0) {
+
+			// Actually the value of i is the value of a.
+			for(int i = 0; i < sumpdf.size(); i++) {
+				double nominator = sumpdf[i];
+
+				if(i - w >= 0)
+					nominator -= tmpRes[i - w] * vpdf[3];
+				if(i - 2 * w >= 0)
+					nominator -= tmpRes[i - 2 * w] * vpdf[4];
+				
+				tmpRes[i] = nominator / vpdf[2];
+
+				if(abs(tmpRes[i]) < threshold || tmpRes[i] < 0)
+					tmpRes[i] = 0;
+
+			} 
+  	} else {
+				for(int i = sumpdf.size() - 1; i >= 0; i--) {
+					double nominator = sumpdf[i];		 		
+					
+					if(i - w < sumpdf.size())
+						nominator -= tmpRes[i - w] * vpdf[3];
+					if(i - 2 * w < sumpdf.size())
+						nominator -= tmpRes[i - 2 * w] * vpdf[4];
+				
+					tmpRes[i] = nominator / vpdf[2];
+					if(abs(tmpRes[i]) < threshold || tmpRes[i] < 0)
+						tmpRes[i] = 0;
+  	   	}
+  		}
+	} 
+	// P(r = a) = (P(Y = a + 2 * w1) - P(r = a + 2 * w1) * P(x1 = 0) - 
+	//            P(r = a + w1) * P(x1 = 1)) / P(x1 = 2)
+	else if(vpdf[4] >= vpdf[2]) {
+		if(w > 0) {
+			for(int i=sumpdf.size()-1; i>=0; i--) {
+				
+				if(i + 2 * w >= sumpdf.size())  continue;
+
+				double nominator = sumpdf[i + 2 * w];
+				nominator -= tmpRes[i + 2 * w] * vpdf[2];
+				nominator -= tmpRes[i + w] * vpdf[3];
+				
+				tmpRes[i] = nominator / vpdf[4];
+				if(abs(tmpRes[i]) < threshold || tmpRes[i] < 0)
+					tmpRes[i] = 0;
+					
+			}
+		} else {
+			for(int i=0; i<sumpdf.size(); i++) {
+				
+				if( i + 2 * w < 0)  continue;
+
+				double nominator = sumpdf[i + 2 * w];
+				nominator -= tmpRes[i + 2 * w] * vpdf[2];
+				nominator -= tmpRes[i + w] * vpdf[3];
+
+				tmpRes[i] = nominator / vpdf[4];
+				if(abs(tmpRes[i]) < threshold || tmpRes[i] < 0)
+					tmpRes[i] = 0;
+			}
+		}
+	} 
+
+	respdf = tmpRes;
+	for(int i=0; i<respdf.size(); i++) {
+		if(std::isnan(abs(respdf[i])) || std::isinf(respdf[i]))
+			cout << "nan message!" << endl;
+	}
+
+  vecNorm(respdf);
+
+	double sum = 0;
+ 	for(int i=0; i<respdf.size(); i++) {
+		sum += respdf[i];
+	}
+
+	if(std::isnan(sum) || sum < 0.5)
+		cout << "problem!" << endl;
+}
+
 int weightPdf(double weight, vector<double> &pdf)
 {
   if(pdf.size()%2 == 0) {
@@ -894,25 +991,25 @@ int weightPdf(double weight, vector<double> &pdf)
     return -1;
   }
 
-
   int newsize = (pdf.size()-1) * abs(weight)+1;
   vector<double> newpdf(newsize);
 
   int midpoint_old = (pdf.size()-1)/2;        // 0 position in the old pdf
   int midpoint_new = (newsize-1)/2;           // 0 position in the weighted pdf
 
-  for(int index=0;index<pdf.size();++index)
-    {
+  for(int index=0;index<pdf.size();++index)	{
       double realvalue = index - midpoint_old; //the value of random variables
       double weightvalue = weight*realvalue;   //weighted value of random variables
 
       int newpos = weightvalue + midpoint_new;
-            
-      if( int(newpos) != newpos )             // In the case that weight is not an interger, only 
-	continue;                             // calculate the probability for meaningful value, which
-      else                                    // are all intergers.
-	newpdf[newpos] = pdf[index];
-    }
+        
+			// In the case that weight is not an integer, only calculate the probability for meaningful
+			// value, which are all integers.
+      if( int(newpos) != newpos )            
+				continue;                             
+      else                                    
+				newpdf[newpos] = pdf[index];
+	}
 
   pdf = newpdf;
 }
@@ -967,7 +1064,7 @@ vector<vector<double> > GramSchmit(vector<vector<double> > &matrix)
 	sum += pow(ui[veci], 2);
       sum = sqrt(sum);
       for(int veci=0;veci<ui.size();++veci)
-	ui[veci] /= sum;
+				ui[veci] /= sum;
 
       baseVectors.push_back(ui);
     }
@@ -1259,19 +1356,17 @@ vector<vector<double> >  sphereSoftEstimator(vector<complex<double> > y, vector<
   double checksum = 0;
 
   // Calculate the probability of each candidate vector
-  for(int vecindex=0;vecindex<candidates.size();++vecindex)
-      {
+  for(int vecindex=0;vecindex<candidates.size();++vecindex) {
 	
-	double yhsSquare = candidates[vecindex][symbolnum];
-	double pro = exp( (-1) * yhsSquare  / (2 * pow(sigma,2)) ) / pow(2*pi*pow(sigma,2), 2);
+		double yhsSquare = candidates[vecindex][symbolnum];
+		double pro = exp( (-1) * yhsSquare  / (2 * pow(sigma,2)) ) / pow(2*pi*pow(sigma,2), 2);
 	  
-	// Store the original symbol vector and corresponding pdf to the prodata
-	candidates[vecindex].resize(symbolnum);
-	originalSymbols = candidates[vecindex];
-	prodata[originalSymbols] = pro;
-      }
+		// Store the original symbol vector and corresponding pdf to the prodata
+		candidates[vecindex].resize(symbolnum);
+		originalSymbols = candidates[vecindex];
+		prodata[originalSymbols] = pro;
+	}
 
-  
   //Determine the size of the pdf vector for each symbol in the vector
   int pdfsize;
   if(possiblenum == 2)  // Digital bit
@@ -1307,8 +1402,622 @@ vector<vector<double> >  sphereSoftEstimator(vector<complex<double> > y, vector<
 
   return pdfdata;
 }
-  
-  
-  
-    
 
+// Synthetic RP decoder with individual sys nodes.
+vector<vector<double> > syntheticDecoderRP(Coded_info &symNodeInfo1, Coded_info &symNodeInfo2, int symIndex, vector<Sys_info>& sysNodeInfo1, vector<Sys_info>& sysNodeInfo2, vector<double>& channelPdf, double norFactor) {
+
+	// Get LLR messages from systematic node group and transform messages
+	// into synthetic message: P0, P1, P2: the probability of the sum
+	// of two corresponding systematic bits being i. And the information
+	// is represented in the form of pdf vector.
+	
+	int degree1 = symNodeInfo1.nodeData.degree;
+	vector<double> inmessage1(degree1);
+
+	for(int index=0; index<degree1; ++index) {
+  	int neiNum = symNodeInfo1.nodeData.neighbourNum[index];
+    int messageIndex = symNodeInfo1.nodeData.inmessageIndex[index];
+    inmessage1[index] = sysNodeInfo1[neiNum].getMessage(messageIndex, 1);
+	}
+
+	int degree2 = symNodeInfo2.nodeData.degree;
+	vector<double> inmessage2(degree2);
+
+	for(int index=0; index<degree2; ++index) {
+  	int neiNum = symNodeInfo2.nodeData.neighbourNum[index];
+    int messageIndex = symNodeInfo2.nodeData.inmessageIndex[index];
+    inmessage2[index] = sysNodeInfo2[neiNum].getMessage(messageIndex, 1);
+	}
+
+	// Make sure that the degrees of 2 RP symbol nodes are the same.
+	// Since RCM matrix are the same. They also have the same weights.
+	if(degree1 != degree2) {
+		cerr << "The degree of two RP symbol nodes are different. Systhetic decoding is not able to perform!" << endl;
+		exit(EXIT_FAILURE) ;
+	}
+	
+	int degree = degree1;
+
+	// Out going pdfs.
+	vector<vector<double> > outPdf;
+
+	// There are total degree pdfs from sys node and the length of
+	// each one is 5.
+	vector<vector<double> >sysPdf(degree, vector<double>(5));
+	for(int index=0; index<degree; index++) {
+		double mess1 = inmessage1[index];
+		double mess2 = inmessage2[index];
+
+		double p0_1 = exp(mess1) / (1 + exp(mess1));
+		double p1_1 = 1 - p0_1;
+		double p0_2 = exp(mess2) / (1 + exp(mess2));
+		double p1_2 = 1 - p0_2;
+
+		sysPdf[index][2] = p0_1 * p0_2;
+		sysPdf[index][3] = p0_1 * p1_2 + p1_1 * p0_2;
+		sysPdf[index][4] = p1_1 * p1_2;
+
+	}
+
+	// Get normalized weight set.
+	vector<double> weightSet(symNodeInfo1.weightset);
+	vector<double> norWeight(degree);
+	for(int i=0; i<degree; i++)
+		norWeight[i] = norFactor * weightSet[i]; 
+	
+	// Get the pdf of the value after synthetic values multiplied by
+	// the weight.
+	vector<vector<double> > sysAlias(sysPdf);
+	for(int i=0; i<degree; i++)
+		weightPdf(weightSet[i], sysAlias[i]);
+
+	// Get the pdf of linear combination.
+	vector<double> sumPdf(1, 1);
+	for(int i=0; i<degree; i++)
+		conv(sumPdf, sysAlias[i], sumPdf);
+
+	vecNorm(sumPdf, channelPdf.size());
+
+	for(int i=0; i<degree; i++) {
+		
+		vector<double> resPdf(1, 1);
+		deconvolve2(sumPdf, sysPdf[i], weightSet[i], resPdf);
+
+		// Compute p0, p1, p2, which is the probability of systhetic node
+		// beging x. Then we can know the probability of 00,
+		// 01, 10, 11 and we can calculate LLR message to each
+		// connected systematic node.
+		double zeroPoint = (resPdf.size() - 1) / 2;
+
+		double p0 = 0, p1 = 0, p2 = 0;
+		for(int symI = 0; symI < channelPdf.size(); symI++) {
+
+				p0 += resPdf[symI] * channelPdf[symI];
+				
+				int comPos = symI - weightSet[i];
+				if(comPos >= 0 && comPos < resPdf.size())
+	  			p1 += resPdf[comPos] * channelPdf[symI];
+
+				comPos = symI - 2 * weightSet[i];
+				if(comPos >= 0 && comPos < resPdf.size())
+					p2 += resPdf[comPos] * channelPdf[symI];
+	
+		}
+
+		double p0Individual = p0 + p1 / 2;
+		double p1Individual = p2 + p1 / 2;
+		double message = 0;
+		double threshold = 50;
+
+		if(p0Individual == 0 || p1Individual == 0)
+			message = 0;
+    else {
+			message = log(p0Individual / p1Individual);
+			if(message > threshold)
+	  		message = threshold;
+			if(message < -threshold)
+	  		message = -threshold;
+			if(std::isnan(message))
+	  		std::cout<<"invalid message!"<<std::endl;
+      }
+
+			symNodeInfo1.setMessage(message, i);
+			symNodeInfo2.setMessage(message, i);
+	
+			// Out going pdf one the current edge.
+			vector<double> oneOutMessage {0, 0, p0, p1, p2};
+			vecNorm(oneOutMessage);
+			outPdf.emplace_back(oneOutMessage);
+	}
+	return outPdf;
+}
+
+// Synthetic RP decoder with synthetic sys nodes.
+vector<vector<double> > syntheticDecoderRP(Coded_info &symNodeInfo1, Coded_info &symNodeInfo2, int symIndex, vector<vector<vector<double> > > &pdfMessageFromSys, vector<double>& channelPdf, double norFactor) {
+
+	int degree = symNodeInfo1.nodeData.degree;
+	vector<vector<double> > sysPdf(degree, vector<double>(5, 0));
+
+	for(int index=0; index<degree; ++index) {
+  	int neiNum = symNodeInfo1.nodeData.neighbourNum[index];
+    int messageIndex = symNodeInfo1.nodeData.inmessageIndex[index];
+    sysPdf[index] = pdfMessageFromSys[neiNum][messageIndex];
+	}
+	
+	// Out going pdfs.
+	vector<vector<double> > outPdf;
+
+	// Get normalized weight set.
+	vector<double> weightSet(symNodeInfo1.weightset);
+	vector<double> norWeight(degree);
+	for(int i=0; i<degree; i++)
+		norWeight[i] = norFactor * weightSet[i]; 
+	
+	// Get the pdf of the value after synthetic values multiplied by
+	// the weight.
+	vector<vector<double> > sysAlias(sysPdf);
+	for(int i=0; i<degree; i++)
+		weightPdf(weightSet[i], sysAlias[i]);
+
+	// Get the pdf of linear combination.
+	vector<double> sumPdf(1, 1);
+	for(int i=0; i<degree; i++)
+		conv(sumPdf, sysAlias[i], sumPdf);
+
+	vecNorm(sumPdf, channelPdf.size());
+
+	for(int i=0; i<degree; i++) {
+		
+		vector<double> resPdf(1, 1);
+		deconvolve2(sumPdf, sysPdf[i], weightSet[i], resPdf);
+
+		// Compute p0, p1, p2, which is the probability of systhetic node
+		// beging x. Then we can know the probability of 00,
+		// 01, 10, 11 and we can calculate LLR message to each
+		// connected systematic node.
+		double zeroPoint = (resPdf.size() - 1) / 2;
+
+		double p0 = 0, p1 = 0, p2 = 0;
+		for(int symI = 0; symI < channelPdf.size(); symI++) {
+
+				p0 += resPdf[symI] * channelPdf[symI];
+				
+				int comPos = symI - weightSet[i];
+				if(comPos >= 0 && comPos < resPdf.size())
+	  			p1 += resPdf[comPos] * channelPdf[symI];
+
+				comPos = symI - 2 * weightSet[i];
+				if(comPos >= 0 && comPos < resPdf.size())
+					p2 += resPdf[comPos] * channelPdf[symI];
+	
+		}
+
+		// Out going pdf one the current edge.
+		vector<double> oneOutMessage {0, 0, p0, p1, p2};
+		vecNorm(oneOutMessage);
+		outPdf.emplace_back(oneOutMessage);
+	}
+	return outPdf;
+}
+
+// For hybrid. Take pdf message from RP nodes.
+vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sysNodeInfo2, vector<vector<vector<double> > >& pdfMessageFromRP, vector<Coded_info> &neiNode1, vector<Coded_info>& neiNode2, vector<double>& channelInfo, vector<double>& channelLLR, vector<double>& sideInfo, double y, double sigma, double p, int index, ofstream &proTrack, int sys1, int sys2, int iteration) {
+
+	int degree = sysNodeInfo1.nodeData.degree;
+	int paraDegree = sysNodeInfo1.nodeData.para_degree;
+
+	vector<vector<double> > inPdfMessage(degree);
+	vector<double> inLLR1(paraDegree);
+	vector<double> inLLR2(paraDegree);
+
+	for(int i=0; i<degree; i++) {
+		int neiNum = sysNodeInfo1.nodeData.neighbourNum[i];
+		int messageIndex = sysNodeInfo1.nodeData.inmessageIndex[i];
+		inPdfMessage[i] = pdfMessageFromRP[neiNum][messageIndex];
+	}
+
+	for(int i=0; i<paraDegree; i++) {
+		int neiNum1 = sysNodeInfo1.nodeData.para_neighbourNum[i];
+		int messageIndex1 = sysNodeInfo1.nodeData.para_inmessageIndex[i];
+		inLLR1[i] = neiNode1[neiNum1].getMessage(messageIndex1);
+
+		int neiNum2 = sysNodeInfo2.nodeData.para_neighbourNum[i];
+		int messageIndex2 = sysNodeInfo2.nodeData.para_inmessageIndex[i];
+		inLLR2[i] = neiNode2[neiNum2].getMessage(messageIndex2);
+	}
+
+	double p0FromRP = 1;
+	double p1FromRP = 1;
+	double p2FromRP = 1;
+
+	for(int i=0; i<degree; i++) {
+		p0FromRP *= inPdfMessage[i][2];
+		p1FromRP *= inPdfMessage[i][3];
+		p2FromRP *= inPdfMessage[i][4];
+	}
+
+	// Normalization probability mass from RP.
+	double pTotalFromRP = p0FromRP + p1FromRP + p2FromRP;
+	p0FromRP /= pTotalFromRP;
+	p1FromRP /= pTotalFromRP;
+	p2FromRP /= pTotalFromRP;
+
+	// Combine messages from coded nodes
+	double LLRFromLDGM1 = 0, LLRFromLDGM2 = 0;
+	for(int i=0; i<paraDegree; i++) {
+		LLRFromLDGM1 += inLLR1[i]; 
+		LLRFromLDGM2 += inLLR2[i];
+	}
+	
+	double p1FromCoded1 = 1 / (1 + exp(LLRFromLDGM1));
+	double p0FromCoded1 = 1 - p1FromCoded1;
+	double p1FromCoded2 = 1 / (1 + exp(LLRFromLDGM2));
+	double p0FromCoded2 = 1 - p1FromCoded2;
+	
+	double p0FromCoded = p0FromCoded1 * p0FromCoded2;
+	double p1FromCoded = p0FromCoded1 * p1FromCoded2 + p1FromCoded1 * p0FromCoded2;
+	double p2FromCoded = p1FromCoded1 * p1FromCoded2;
+
+	// Combine everything and normalize them.
+	double p0Final = p0FromCoded * p0FromRP * channelInfo[2] * (1 - p) * 0.5;
+	double p1Final = p1FromCoded * p1FromRP * channelInfo[3] * p;
+	double p2Final = p2FromCoded * p2FromRP * channelInfo[4] * (1 - p) * 0.5;
+	double pTotalFinal = p0Final + p1Final + p2Final;
+	p0Final /= pTotalFinal;
+	p1Final /= pTotalFinal;
+	p2Final /= pTotalFinal;
+	
+	// Compute the message to the synthetic RP nodes
+	vector<vector<double> > outPdf(degree, vector<double>(5, 0));
+	for(int i=0; i<degree; i++) {
+		outPdf[i][2] = p0Final / inPdfMessage[i][2];
+		outPdf[i][3] = p1Final / inPdfMessage[i][3];
+		outPdf[i][4] = p2Final / inPdfMessage[i][4];
+		vecNorm(outPdf[i]);
+	}
+
+	// Method1: Compute the probability on systematic nodes first.
+	// Compute the message to the LDGM nodes.
+	double p1Prior = 1 / (1 + exp(sideInfo[index]));
+	double p0Prior = 1 - p1Prior;
+	
+	double pLDGM1_0 = p0FromCoded1 * (p0Prior * (1 - p) + p1Prior * p) * (channelInfo[2] + channelInfo[3] * p1Prior) * (p0FromRP + p1FromRP * p1Prior);
+	double pLDGM1_1 = p1FromCoded1 * (p1Prior * (1 - p) + p0Prior * p) * (channelInfo[4] + channelInfo[3] * p0Prior) * (p2FromRP + p1FromRP * p0Prior);
+
+	
+	/* // Update LDGM2 without using channel and RP information.
+	double pLDGM2_0 = p0FromCoded2 * (pLDGM1_0 * (1 - p) + pLDGM1_1 * p);
+	double pLDGM2_1 = p1FromCoded2 * (pLDGM1_1 * (1 - p) + pLDGM1_0 * p);
+*/
+
+	// Use message from RP and Channel with LDGM1 pro
+	double pLDGM2_0 = p0FromCoded2 * (pLDGM1_0 * (1 - p) + pLDGM1_1 * p) * (channelInfo[2] + channelInfo[3] * pLDGM1_1) * (p0FromRP + p1FromRP * pLDGM1_1);
+	double pLDGM2_1 = p1FromCoded2 * (pLDGM1_0 * p + pLDGM1_1 * (1 - p)) * (channelInfo[4] + channelInfo[3] * pLDGM1_0) * (p2FromRP + p1FromRP * pLDGM1_0);
+
+	
+	/* // Use Message from RP and Channel Unbiased
+	double pLDGM2_0 = p0FromCoded2 * (p0FromCoded1 * (1 - p) + p1FromCoded1 * p) * (channelInfo[2] + 0.5 * channelInfo[3]) * (p0FromRP + 0.5 * p1FromRP);
+	double pLDGM2_1 = p1FromCoded2 * (p1FromCoded1 * (1 - p) + p0FromCoded1 * p) * (channelInfo[4] + 0.5 * channelInfo[3]) * (p2FromRP + 0.5 * p1FromRP);
+	*/
+
+	sideInfo[index] = log(pLDGM2_0 / pLDGM2_1);
+
+	double LLRFinal1 = log(pLDGM1_0 / pLDGM1_1);
+	double LLRFinal2 = log(pLDGM2_0 / pLDGM2_1); 
+
+	double threshold = 30;
+	for(int i=0; i<paraDegree; i++) {
+		double outMessage = LLRFinal1 - inLLR1[i];
+
+		if(outMessage < -threshold)  outMessage = -threshold;
+		else if(outMessage > threshold)  outMessage = threshold;
+
+		sysNodeInfo1.setMessage(outMessage, i, 2);
+				
+		if(std::isnan(outMessage))
+		cout << "Outgoing messages from sys nodes are nan!" << endl;
+	
+		outMessage = LLRFinal2 - inLLR2[i];
+
+		if(outMessage < -threshold)  outMessage = -threshold;
+		else if(outMessage > threshold)  outMessage = threshold;
+
+		sysNodeInfo2.setMessage(outMessage, i, 2);
+				
+		if(std::isnan(outMessage))
+		cout << "Outgoing messages from sys nodes are nan!" << endl;
+	}
+	/*
+//	// Initial LLR for sys node 1
+//	double LLRForSys = log((p0RPandChannel + 0.5 * p1RPandChannel) / 
+//												  (p2RPandChannel + 0.5 * p1RPandChannel));
+//	*/
+//	
+//	double LLRFromRP = log((p0FromRP + 0.5 * p1FromRP) / (p2FromRP + 0.5 * p1FromRP));
+//
+//	/*	
+//	if(sys1 == 0)
+//		channelLLR[index] = 0;
+//	else
+//		channelLLR[index] = 0;
+//	*/
+//	double LLRFinal1 = channelLLR[index] + LLRFromRP + LLRFromLDGM1 + sideInfo[index];
+//	
+//	/*
+//	// If P1 from RP is greater than the other two, this information
+//	// would not be used.
+//	if(p1FromRP >= p0FromRP && p1FromRP >= p2FromRP)
+//		LLRFinal1 -= LLRFromRP;
+//	if(channelInfo[3] >= channelInfo[2] && channelInfo[3] >= channelInfo[4])
+//		LLRFinal1 -= channelLLR[index];
+//	*/
+//
+//	/*
+//	double LLRFinal2 = channelLLR[index] + LLRFromRP + LLRFromLDGM2;
+//	if(p1FromRP >= p0FromRP && p1FromRP >= p2FromRP)
+//		LLRFinal2 -= LLRFromRP;
+//	if(channelInfo[3] >= channelInfo[2] && channelInfo[3] >= channelInfo[4])
+//		LLRFinal2 -= channelLLR[index];
+//*/
+//		
+//	
+//	// Incorporate correlation into LLR.
+//	//LLRFinal1 += log(((1 - p) * exp(LLRFinal2) + p) / (1 - p + p * exp(LLRFinal2)));
+//	//LLRFinal2 += log(((1 - p) * exp(LLRFinal1) + p) / (1 - p + p * exp(LLRFinal1)));
+//
+//	double threshold = 30;
+//	for(int i=0; i<paraDegree; i++) {
+//		double outMessage = LLRFinal1 - inLLR1[i];
+//
+//		if(outMessage < -threshold)  outMessage = -threshold;
+//		else if(outMessage > threshold)  outMessage = threshold;
+//
+//		sysNodeInfo1.setMessage(outMessage, i, 2);
+//				
+//		if(std::isnan(outMessage))
+//		cout << "Outgoing messages from sys nodes are nan!" << endl;
+//	
+//		/*		
+//		outMessage = LLRFinal2 - inLLR2[i];
+//
+//		if(outMessage < -threshold)  outMessage = -threshold;
+//		else if(outMessage > threshold)  outMessage = threshold;
+//
+//		sysNodeInfo2.setMessage(outMessage, i, 2);
+//				
+//		if(std::isnan(outMessage))
+//		cout << "Outgoing messages from sys nodes are nan!" << endl;
+//		*/
+//	}
+//
+//		// Decoding process for sys node 2.
+//		
+//		// Calculate channel state message to sys node 2
+//		double Esender = 1;
+//		double messageToState = LLRFinal1 - channelLLR[index];
+//		double nominator1 = exp(-pow(y, 2) / (2 * pow(sigma, 2))) / exp(messageToState);
+//		double nominator2 = (exp(-pow(y+2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))));
+//		double denominator1 = exp(-pow(y-2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))) / exp(messageToState);
+//		double denominator2 = (exp(-pow(y, 2) / (2 * pow(sigma, 2))));
+//
+//		if(std::isinf(nominator1) && std::isinf(denominator1)) {
+//			channelLLR[index] = log(exp(-pow(y, 2) / (2 * pow(sigma, 2))) / exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * pow(sigma, 2))));
+//		} else {
+//				channelLLR[index] = log((nominator1 + nominator2) / (denominator1 + denominator2));
+//		}
+//
+//		// Update the correlation message for sys node 2.
+//		sideInfo[index] = log(((1 - p) * exp(LLRFinal1) + p) / (1 - p + p * exp(LLRFinal1)));
+//
+//		double LLRFinal2 = channelLLR[index] + LLRFromLDGM2 + sideInfo[index];
+//
+//		for(int i=0; i<paraDegree; i++) {
+//			double outMessage = LLRFinal2 - inLLR2[i];
+//
+//			if(outMessage < -threshold)  outMessage = -threshold;
+//			else if(outMessage > threshold)  outMessage = threshold;
+//
+//			sysNodeInfo2.setMessage(outMessage, i, 2);
+//				
+//			if(std::isnan(outMessage))
+//			cout << "Outgoing messages from sys nodes are nan!" << endl;
+//		}
+//
+//		// Compute the state message to the sys node 1.
+//		messageToState = LLRFinal2 - channelLLR[index];
+//		nominator1 = exp(-pow(y, 2) / (2 * pow(sigma, 2))) / exp(messageToState);
+//		nominator2 = (exp(-pow(y+2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))));
+//		denominator1 = exp(-pow(y-2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))) / exp(messageToState);
+//		denominator2 = (exp(-pow(y, 2) / (2 * pow(sigma, 2))));
+//
+//		if(std::isinf(nominator1) && std::isinf(denominator1)) {
+//			channelLLR[index] = log(exp(-pow(y, 2) / (2 * pow(sigma, 2))) / exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * pow(sigma, 2))));
+//		} else {
+//				channelLLR[index] = log((nominator1 + nominator2) / (denominator1 + denominator2));
+//		}
+//
+//		// Update the correlation message for sys node 1.
+//		sideInfo[index] = log(((1 - p) * exp(LLRFinal2) + p) / (1 - p + p * exp(LLRFinal2)));
+//	
+
+	// Make decision.
+	sysNodeInfo1.llrEstimation = LLRFinal1;
+	sysNodeInfo2.llrEstimation = LLRFinal2;
+
+	double p00 = 0.5 * (1- p) * p0FromRP * p0FromCoded1 * p0FromCoded2 * channelInfo[2];
+	double p01 = 0.5 * p * p1FromRP * channelInfo[3] * p0FromCoded1 * p1FromCoded2;
+	double p10 = 0.5 * p * p1FromRP * channelInfo[3] * p1FromCoded1 * p0FromCoded2;
+	double p11 = 0.5 * (1 - p) * p2FromRP * p1FromCoded1 * p1FromCoded2 * channelInfo[4];
+
+	if(p00 >= p01 && p00 >= p10 && p00 >= p11) {
+		sysNodeInfo1.decision = 0;
+		sysNodeInfo2.decision = 0;
+	} else if(p01 >= p00 && p01 >= p10 && p01 >= p11) {
+		sysNodeInfo1.decision = 0;
+		sysNodeInfo2.decision = 1;
+	} else if(p10 >= p00 && p10 >= p01 && p10 >= p11) {
+		sysNodeInfo1.decision = 1;
+		sysNodeInfo2.decision = 0;
+	} else if(p11 >= p00 && p11 >= p01 && p11 >= p10) {
+		sysNodeInfo1.decision = 1;
+		sysNodeInfo2.decision = 1;
+	} else {
+		cout << "Wrong decision!" << endl;
+	}
+
+
+/*	
+	if(LLRFinal1 >= 0)
+		sysNodeInfo1.decision = 0;
+	else
+		sysNodeInfo1.decision = 1;
+	
+	if(LLRFinal2 >= 0)
+		sysNodeInfo2.decision = 0;
+	else
+		sysNodeInfo2.decision = 1;
+	*/
+
+	// Record some information.
+	if(iteration > 2 && (sysNodeInfo1.decision != sys1 || sysNodeInfo2.decision != sys2)) {
+		proTrack << "Iteration: " << iteration << endl;
+		proTrack << "Index: " << index 
+						 << " (sys1, sys2):" << "(" << sys1 << "," << sys2 << ")" << endl;
+		proTrack << "Decision: " << "(" << sysNodeInfo1.decision << "," 
+						 << sysNodeInfo2.decision << ")" << endl;
+		proTrack << "Final (p00, p01, p10, p11): (" 
+						 << p00 << "," << p01 << "," << p10 << "," << p11 << ")" << endl;
+		proTrack << "(p0FromRP, p1FromRP, p2FromRP): (" 
+						 << p0FromRP << "," << p1FromRP << "," << p2FromRP << ")" << endl;
+		proTrack << "From LDGM1 (p0, p1): (" << p0FromCoded1 << "," 
+						 << p1FromCoded1 << ")" << endl;
+		proTrack << "From LDGM2 (p0, p1): (" << p0FromCoded2 << "," 
+					   << p1FromCoded2 << ")" << endl;
+		proTrack << "Channel information: " 
+						 << "(" << channelInfo[2] << "," << channelInfo[3] << ","
+						 << channelInfo[4] << ")" << endl;
+		proTrack << "LLREstimation: (" << LLRFinal1 << "," << LLRFinal2 << ")" << endl;
+		proTrack << endl;
+	}
+	
+	return outPdf;
+}
+
+// For pure RCM.
+vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sysNodeInfo2, vector<vector<vector<double> > >& pdfMessageFromRP, vector<double>& channelInfo, double p, int index, ofstream &proTrack, int sys1, int sys2, int iteration) {
+
+	int degree = sysNodeInfo1.nodeData.degree;
+
+	vector<vector<double> > inPdfMessage(degree);
+
+	// Get incoming messages.
+	for(int i=0; i<degree; i++) {
+		int neiNum = sysNodeInfo1.nodeData.neighbourNum[i];
+		int messageIndex = sysNodeInfo1.nodeData.inmessageIndex[i];
+		inPdfMessage[i] = pdfMessageFromRP[neiNum][messageIndex];
+	}
+
+	double p0FromRP = 1;
+	double p1FromRP = 1;
+	double p2FromRP = 1;
+
+	for(int i=0; i<degree; i++) {
+		p0FromRP *= inPdfMessage[i][2];
+		p1FromRP *= inPdfMessage[i][3];
+		p2FromRP *= inPdfMessage[i][4];
+	}
+
+	// Probability from RP
+	double pTotalFromRP = p0FromRP + p1FromRP + p2FromRP;
+	p0FromRP /= pTotalFromRP;
+	p1FromRP /= pTotalFromRP;
+	p2FromRP /= pTotalFromRP;
+
+	// Probability in total and normalization.
+	double p0Final = p0FromRP * channelInfo[2] * 0.5 * (1 - p);
+	double p1Final = p1FromRP * channelInfo[3] * p;
+	double p2Final = p2FromRP * channelInfo[4] * 0.5 * (1 - p);
+	
+	double pTotalFinal = p0Final + p1Final + p2Final;
+	p0Final /= pTotalFinal;
+	p1Final /= pTotalFinal;
+	p2Final /= pTotalFinal;
+	
+
+	// Compute the message to the synthetic RP nodes
+	vector<vector<double> > outPdf(degree, vector<double>(5, 0));
+	for(int i=0; i<degree; i++) {
+		outPdf[i][2] = p0Final / inPdfMessage[i][2];
+		outPdf[i][3] = p1Final / inPdfMessage[i][3];
+		outPdf[i][4] = p2Final / inPdfMessage[i][4];
+		vecNorm(outPdf[i]);
+	}
+
+	/*
+	if(p0Final > p1Final && p0Final > p2Final) {
+		sysNodeInfo1.decision = 0;
+		sysNodeInfo2.decision = 0;
+	} else if(p2Final > p0Final && p2Final > p1Final) {
+		sysNodeInfo1.decision = 1;
+		sysNodeInfo2.decision = 1;
+	} else {
+		int random = rand() % 100;
+		if(random < 50) {
+			sysNodeInfo1.decision = 0;
+			sysNodeInfo2.decision = 1;
+		} else {
+			sysNodeInfo1.decision = 1;
+			sysNodeInfo2.decision = 0;
+		}
+	}*/
+
+	// ----- To use LLR to make decision
+	// Start to calculate the message to coded nodes and make decision.
+	double channelLLR = log((channelInfo[2] + 0.5 * channelInfo[3]) /
+												  (channelInfo[4] + 0.5 * channelInfo[3]));
+	double LLRFromRP = 0;
+	for(int i=0; i<degree; i++) {
+		LLRFromRP += log((inPdfMessage[i][2] + 0.5 * inPdfMessage[i][3]) /
+										 (inPdfMessage[i][4] + 0.5 * inPdfMessage[i][3]));
+	}	
+	
+	double LLRFinal1 = channelLLR + LLRFromRP;
+	double LLRFinal2 = channelLLR + LLRFromRP;
+
+	// Make decision.
+	sysNodeInfo1.llrEstimation = LLRFinal1;
+	sysNodeInfo2.llrEstimation = LLRFinal2;
+
+	if(LLRFinal1 > 0)
+		sysNodeInfo1.decision = 0;
+	else
+		sysNodeInfo1.decision = 1;
+	
+	if(LLRFinal2 > 0)
+		sysNodeInfo2.decision = 0;
+	else
+		sysNodeInfo2.decision = 1;
+	
+	// Record some information.
+	if(iteration > 2 && (sysNodeInfo1.decision != sys1 || sysNodeInfo2.decision != sys2)) {
+		proTrack << "Iteration: " << iteration << endl;
+		proTrack << "Index: " << index 
+						 << " (sys1, sys2):" << "(" << sys1 << "," << sys2 << ")" << endl;
+		proTrack << "Decision: " << "(" << sysNodeInfo1.decision << "," 
+						 << sysNodeInfo2.decision << ")" << endl;
+		proTrack << "Final (p0, p1, p2): (" 
+						 << p0FromRP * channelInfo[2] << ","
+						 << p1FromRP * channelInfo[3] << ","
+						 << p2FromRP * channelInfo[4] << ")" << endl;
+		proTrack << "(p0FromRP, p1FromRP, p2FromRP): (" 
+						 << p0FromRP << "," << p1FromRP << "," << p2FromRP << ")" << endl;
+		proTrack << "Channel information: " 
+						 << "(" << channelInfo[2] << "," << channelInfo[3] << ","
+						 << channelInfo[4] << ")" << endl;
+		proTrack << endl;
+
+	}
+	
+	return outPdf;
+}
+   

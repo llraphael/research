@@ -164,7 +164,7 @@ double getNormalizationFactorQAM(std::vector<double> &symbolset, std::vector<dou
 
 std::vector<std::complex<double> > modulatorQAM(std::vector<double> &symbols, double normalizefactor);   // QAM modulation.
 
-std::map<double, double> getSymbolSet(std::vector<double> &weightset, const double p1, double zeroProcess=0);   // Employed in the RCM scheme. Determine symbol values based on chosed weight set.
+std::map<int, double> getSymbolSet(std::vector<double> &weightset, const double p1, double zeroProcess=0);   // Employed in the RCM scheme. Determine symbol values based on chosed weight set.
 
 int linearEncoder(std::vector<Coded_info> &codedNodeInfo, std::vector<int> &sysBits, std::vector<double> &symbols, int startPos = 0, double zeroProcess=0);  //Generate coded bits for LDGM codes.
 

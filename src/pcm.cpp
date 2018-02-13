@@ -3,6 +3,7 @@
 #include <map>
 #include "stdlib.h"
 #include <time.h>
+#include "function.h"
 
 using namespace std;
 

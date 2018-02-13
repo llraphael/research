@@ -84,7 +84,6 @@ Matrix linearMatrixConsD8(int N, vector<int> &weight, int seed)
   for(int i=1;i<4;++i)
     finalmatrix.matrixStackDown(matrixhori[i]);
 
-
   return finalmatrix;
 
 }
@@ -106,11 +105,11 @@ int main()
 {
   // Source info
   int sysNumber = 10000;
-  int symbolNumber = 10000;
-  int codedNumber = 10000;
-  int sysDegree = 25;
+  int symbolNumber = 8000;
+  int codedNumber = 2000;
+  int sysDegree = 3;
   
-  double p1 = 0.01;    //sparsity of the source.
+  double p1 = 0.5;    //sparsity of the source.
   double p0 = 1 - p1;
 
   double entropy = -p0 * log2(p0) - p1 * log2(p1);
@@ -144,15 +143,14 @@ int main()
 
   vector<int> weightval(wval, wval+weightsize/2);
  
-  map<double, double> symbolsetdata = getSymbolSet(weightset, p1);
+  map<int, double> symbolsetdata = getSymbolSet(weightset, p1);
   map<int, vector<vector<int> > > mappingTable = getMappingTable(weightset);
   vector<double> symbolset;
   vector<double> symbolpro;
   
-   map<double, double>::iterator it = symbolsetdata.begin();
+   map<int, double>::iterator it = symbolsetdata.begin();
 
-   for(it; it!=symbolsetdata.end(); ++it)
-    {
+   for(it; it!=symbolsetdata.end(); ++it) {
       symbolset.push_back( it->first ); 
       symbolpro.push_back( it->second );
     }
@@ -206,14 +204,12 @@ int main()
   for(int index=0;index<sysNumber;++index)
     sysNodeInfo[index].getsourceNum(symNodeInfo, codedNodeInfo, index);
 
- 
   // Calculate the average value of transimitted symbols
   double Es = 1;
   double Eb = Es / inforate;
 
   cout<<"average energy is:"<<Es<<endl;
 
- 
   // Start to generate sys bits and transmitted symbols
   vector<int> systematicbits(sysNumber,0);
   vector<double> rpsymbols(symbolNumber, 0);
@@ -233,7 +229,7 @@ int main()
   vector<double> codedChannelOutput(codedNumber, 0);                   // LLR message from channel(codedbits)
 
 	double gap = 1.5;
-  double snr = capacity + gap;
+  double snr = 8;
   double sigma = sqrt( Es / (2 * pow(10, snr/10)) ); 
   double noiseVar = pow(sigma, 2);
 
@@ -264,7 +260,12 @@ int main()
   
   // The indicator for the message passing method:
   // 1: Accurate message passing; 2: Simplified decoding.
-  int messageMethod = 1; 
+  int messageMethod = 2;
+  if(messageMethod == 2) {
+    for(int i=0; i<sysNumber; i++)  sysNodeInfo[i].allocateForMeanAndVar();
+    for(int i=0; i<symbolNumber; i++)  symNodeInfo[i].allocateForMeanAndVar();
+  }
+
   while(currentblock < blocknum) {
 
     ++currentblock;
@@ -356,7 +357,7 @@ int main()
         for(int i=0; i<symbolNumber; i++) {
           double rpObservation = channelSignals[i/2].real();
           if(i % 2 == 1)  rpObservation = channelSignals[i/2].imag();
-          symNodeInfo[i].computeInMeanAndVar(sysNodeInfo, rpObservation, symbolpro, norfactor, noiseVar, 1, "llr");
+          symNodeInfo[i].computeInMeanAndVar(sysNodeInfo, rpObservation, symbolsetdata, norfactor, noiseVar, 1, "llr");
         }
         for(int i=0; i<codedNumber; i++)
           codedNodeInfo[i].computeMessage(sysNodeInfo, codedChannelOutput[i], 2);

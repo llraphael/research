@@ -188,7 +188,6 @@ void Coded_info::computeMessage(std::vector<Sys_info> &neiNode, double channelIn
   int degree=nodeData.degree;
   std:: vector<double> inmessage(degree,0);
   
-  #pragma omp parallel for 
   for(int index=0;index<degree;++index)
     {
       int neiNum=nodeData.neighbourNum[index];
@@ -204,31 +203,31 @@ void Coded_info::computeMessage(std::vector<Sys_info> &neiNode, double channelIn
   for(int index=0;index<degree;++index)
     {
       if(inmessage[index]!=0) 
-	x*=tanh(inmessage[index]/2);
+				x *= tanh(inmessage[index]/2);
       else
-	++zero_message_num;
+				++zero_message_num;
       
     }
 
   if(zero_message_num==1) {
     
-    for(int index=0;index<degree;++index)
-      {
-	if(inmessage[index]==0) {
-	  double u = x;
+    for(int index=0;index<degree;++index) {
+			if(inmessage[index]==0) {
+	  		double u = x;
 
-	  if(u==1) 
-	    u=threshold;
-	  else if(u==-1)
-	    u=-threshold;
-	  else 
-	    u=2*atanh(u);
+	  		if(u==1) 
+	    		u = threshold;
+	  		else if(u==-1)
+	    		u = -threshold;
+	  		else 
+	    		u = 2 * atanh(u);
 
-	  nodeData.outMessage[index] = u;
-	}
-	else nodeData.outMessage[index] = 0;
-      }
-  } 
+	  		nodeData.outMessage[index] = u;
+			}
+			else 
+				nodeData.outMessage[index] = 0;
+    }   
+	} 
   
   else if(zero_message_num>1) {
     for(int index=0;index<degree;++index)
@@ -238,7 +237,6 @@ void Coded_info::computeMessage(std::vector<Sys_info> &neiNode, double channelIn
   else {
 
   //compute the outmessage(U) one by one for the code
-  #pragma omp parallel for 
   for(int outIndex=0;outIndex<degree;++outIndex)
     {
       double u = tanh(inmessage[outIndex]/2);
@@ -246,26 +244,34 @@ void Coded_info::computeMessage(std::vector<Sys_info> &neiNode, double channelIn
       u = x / u;
       
       if( u<-1 || u>1)
-	std::cout<<"check message not senseful"<<std::endl;      
+				std::cout<<"check message not senseful"<<std::endl;      
 
       if(u==1) 
-	u=threshold;
+				u = threshold;
       else if(u==-1)
-	u=-threshold;
+				u = -threshold;
       else 
-        u=2*atanh(u);
+        u = 2 * atanh(u);
 
       if(isinf(u) || isnan(u))
-	std::cout<<"warning! wrong messages!"<<u<<std::endl;
+				std::cout<<"warning! wrong messages!"<<u<<std::endl;
 
       nodeData.outMessage[outIndex]=u;
     }
 
   }
-  /* 
+   
   //compute the message to the state node
-  message_to_state= x / tanh(channelInfo/2);
- 
+  if(channelInfo != 0)
+		message_to_state = x / tanh(channelInfo/2);
+ 	else if(zero_message_num >= 1)
+		message_to_state = 0;
+	else {
+		message_to_state = 1;
+		for(int i=0; i<degree; i++)
+			message_to_state *= tanh(inmessage[i] / 2);
+	}
+
   if(message_to_state==1) 
     message_to_state=threshold;
  
@@ -283,7 +289,7 @@ void Coded_info::computeMessage(std::vector<Sys_info> &neiNode, double channelIn
 
       
   if(isinf(message_to_state) || isnan(message_to_state) )
-  std::cout<<"warning! check channel message wrong!"<<std::endl; */  
+    std::cout<<"warning! check channel message wrong!"<<std::endl;   
 }
 
 const bool Coded_info::compStruc(const Coded_info& rhs)
@@ -309,16 +315,14 @@ void Coded_info :: computePdf(std::vector<Sys_info> &neiNode, std::vector<double
 {
 
   int degree=nodeData.degree;
-  std::vector<double> inmessage(degree,0);
+  std::vector<double> inmessage(degree);
   
-  #pragma omp parallel for 
   for(int index=0;index<degree;++index)
     {
-      int neiNum=nodeData.neighbourNum[index];
-      int messageIndex=nodeData.inmessageIndex[index];
-      double message=neiNode[neiNum].getMessage(messageIndex, identity);
+      int neiNum = nodeData.neighbourNum[index];
+      int messageIndex = nodeData.inmessageIndex[index];
+      inmessage[index] = neiNode[neiNum].getMessage(messageIndex, identity);
  
-      inmessage[index]=message;
     }
 
   std::vector<double> a(3);
@@ -351,7 +355,7 @@ void Coded_info :: computePdf(std::vector<Sys_info> &neiNode, std::vector<double
 
   vecNorm(sumpdf, channelpdf.size());
 
-  
+  pdf_to_state = sumpdf;
   for(int index=0;index<degree;++index)
     {
 
@@ -359,69 +363,35 @@ void Coded_info :: computePdf(std::vector<Sys_info> &neiNode, std::vector<double
  
       deconvolve(sumpdf, syspdf[index], weightset[index], respdf);
 
-      // get pdf of combined bits
-      if(number == 100 && weightset[index] == 2) {
-	if(testCombinedPdf.size() == 0) {
-	  testCombinedPdf = respdf;
-	  testCombinedPdf.push_back(1);
-	} else if(testCombinedPdf[testCombinedPdf.size()-1] <100){
-	  for(int i=0; i<testCombinedPdf.size()-1;i++)
-	    testCombinedPdf[i] += respdf[i];
-	  testCombinedPdf[testCombinedPdf.size()-1]++;
-	  
-	  if(testCombinedPdf[testCombinedPdf.size()-1] / 5 == 0)
-	    std::cout << "wait !" << std::endl;
-	}
-
-      }
-      
       double p0 = 0, p1 = 0;
       double zeropoint = (respdf.size()-1)/2;
       double message = 0;
-      /*
-      for(int i=0;i<respdf.size();++i)
-	{
-	  if(respdf[i] != 0) {
-
-	    double symbolpos = i - zeropoint;                       // calculate the probability of the bit
-	    symbolpos += (channelpdf.size()-1)/2;                   // being zero based on channel message
-	    p0 += respdf[i] * channelpdf[symbolpos];                // and all the other messages.
-
-	    symbolpos = i - zeropoint + weightset[index];           // Calculate the probability of the bit
-	    symbolpos += (channelpdf.size()-1)/2;                   // being one based on channel message
-	    if(symbolpos<0 || symbolpos>channelpdf.size()-1)        // and all the other messages.          
-	      ;
-	    else
-	      p1 += respdf[i] * channelpdf[symbolpos];               
-	  }
-	}
-      */
-      
+            
       // notice that respdf and channelpdf has the same length, so they
       // have the same reference point in the vector
       double rpThreshold = 0;//pow(10, -100);
       for(int symI = 0; symI < channelpdf.size(); symI++) {
-	if(channelpdf[symI] < rpThreshold)
-	  continue;
+				if(channelpdf[symI] < rpThreshold)
+	  			continue;
 
-	p0 += respdf[symI] * channelpdf[symI];
-	int comPos = symI - weightset[index];
-	if(comPos >= 0 && comPos < respdf.size())
-	  p1 += respdf[comPos] * channelpdf[symI];
+				p0 += respdf[symI] * channelpdf[symI];
+				int comPos = symI - weightset[index];
+				if(comPos >= 0 && comPos < respdf.size())
+	  		p1 += respdf[comPos] * channelpdf[symI];
 	
       }
       
       if(p0 == 0 || p1 == 0)
-	message = 0;
+				message = 0;
       else {
-	message = log(p0 / p1);
-	if(message > threshold)
-	  message = threshold;
-	if(message < -threshold)
-	  message = -threshold;
-	if(isnan(message))
-	  std::cout<<"invalid message!"<<std::endl;
-	setMessage(message, index);
+				message = log(p0 / p1);
+				if(message > threshold)
+	  			message = threshold;
+				if(message < -threshold)
+	  			message = -threshold;
+				if(isnan(message))
+	  			std::cout<<"invalid message!"<<std::endl;
+				setMessage(message, index);
       }
     }
 }
@@ -649,7 +619,6 @@ void Coded_info :: computeInMeanAndVar(std::vector<Sys_info> &neiNode, double re
 
     setMessage(message, i);
   }
-  
 }
 
 
@@ -919,7 +888,7 @@ void Sys_info::clearMessage()
 }
 
 
-void Sys_info::computeMessage(std::vector<Coded_info> &neiNode, double initialInfo, int group)
+void Sys_info::computeMessage(std::vector<Coded_info> &neiNode, double channelInfo, double sideInfo, int group)
 {
 
   int degree=nodeData.degree;
@@ -931,41 +900,45 @@ void Sys_info::computeMessage(std::vector<Coded_info> &neiNode, double initialIn
   if(group == 1) {
     for(int index=0;index<degree;++index)
       {
-	int neiNum=nodeData.neighbourNum[index];
-	int messageIndex=nodeData.inmessageIndex[index];
-	double message=neiNode[neiNum].getMessage(messageIndex);
-	inmessage[index] = message;
+				int neiNum=nodeData.neighbourNum[index];
+				int messageIndex=nodeData.inmessageIndex[index];
+				double message=neiNode[neiNum].getMessage(messageIndex);
+				inmessage[index] = message;
       }
-  }
-  if(group == 2) {
-    for(int index=0;index<degree;++index)
-      {
-	int neiNum=nodeData.para_neighbourNum[index];
-	int messageIndex=nodeData.para_inmessageIndex[index];
-	double message=neiNode[neiNum].getMessage(messageIndex);
-	inmessage[index] = message;
+  	}
+  	if(group == 2) {
+    	for(int index=0;index<degree;++index) {
+				int neiNum=nodeData.para_neighbourNum[index];
+				int messageIndex=nodeData.para_inmessageIndex[index];
+				double message=neiNode[neiNum].getMessage(messageIndex);
+				inmessage[index] = message;
       }
-  }  
-  double v=initialInfo;
-  for(int index=0;index<degree;++index)
-    v += inmessage[index];
+  	}  
   
-
-  //compute the outmessage(U) one by one for the code
-  for(int outIndex=0;outIndex<degree;++outIndex)
-    {
+		double v = channelInfo + sideInfo;
+  	for(int index=0;index<degree;++index)
+    	v += inmessage[index];
+  
+		//compute the outmessage(U) one by one for the code
+  	for(int outIndex=0;outIndex<degree;++outIndex) {
       double message = v - inmessage[outIndex];
 
       if(message > threshold)
-	message = threshold;
+				message = threshold;
       if(message < -threshold)
-	message = -threshold;
+				message = -threshold;
  
       setMessage(message, outIndex, group);
     }
 
   //make decision for the node
   llrEstimation=v;
+	message_to_state = v - channelInfo;
+
+	if(message_to_state > threshold)
+		message_to_state = threshold;
+	if(message_to_state < -threshold)
+		message_to_state = -threshold;
 
   if(v>0)
     decision=0;
@@ -982,8 +955,6 @@ void Sys_info::computeMessage(std::vector<Coded_info> &neiNode1, std::vector<Cod
   std::vector<double> inmessage1(degree,0);
   std::vector<double> inmessage2(para_degree, 0);
 
-
-  #pragma omp parallel for 
   for(int index=0;index<degree;++index)
     {
       int neiNum=nodeData.neighbourNum[index];
@@ -992,7 +963,6 @@ void Sys_info::computeMessage(std::vector<Coded_info> &neiNode1, std::vector<Cod
       inmessage1[index] =  message ;
     }
 
-  #pragma omp parallel for 
   for(int index=0;index<para_degree;++index)
     {
       int neiNum=nodeData.para_neighbourNum[index];
@@ -1001,7 +971,7 @@ void Sys_info::computeMessage(std::vector<Coded_info> &neiNode1, std::vector<Cod
       inmessage2[index] = message;
     }
 
-  double v=channelInfo+sideInfo;
+  double v = channelInfo + sideInfo;
   for(int inIndex=0;inIndex!=degree;++inIndex)
     v+=inmessage1[inIndex];
   for(int inIndex=0;inIndex!=para_degree;++inIndex)
@@ -1009,15 +979,14 @@ void Sys_info::computeMessage(std::vector<Coded_info> &neiNode1, std::vector<Cod
 
   
   //compute the outmessage(U) for the first group of coded bits
-  #pragma omp parallel for 
   for(int outIndex=0;outIndex<degree;++outIndex)
     {
       double outMessage = v - inmessage1[outIndex];
   
       if(outMessage<-threshold)
-	outMessage=-threshold;
+				outMessage=-threshold;
       else if(outMessage>threshold)
-	outMessage=threshold;
+				outMessage=threshold;
       else ;
       
       setMessage(outMessage, outIndex, 1);
@@ -1029,17 +998,17 @@ void Sys_info::computeMessage(std::vector<Coded_info> &neiNode1, std::vector<Cod
       double outMessage = v - inmessage2[outIndex];
     
       if(outMessage<-threshold)
-	outMessage=-threshold;
+				outMessage=-threshold;
       else if(outMessage>threshold)
-	outMessage=threshold;
+				outMessage=threshold;
       else ;
       
       setMessage(outMessage, outIndex, 2);
     }
 
 
-  llrEstimation=v;
-  message_to_state=v-channelInfo-sideInfo;
+  llrEstimation = v;
+  message_to_state = v - channelInfo;
 
   if( isnan(llrEstimation) || isnan(message_to_state) )
     std::cout<<"sys message wrong!"<<std::endl;
@@ -1050,13 +1019,11 @@ void Sys_info::computeMessage(std::vector<Coded_info> &neiNode1, std::vector<Cod
     message_to_state=-threshold;
   else ;
 
-  if(llrEstimation>threshold) {
+  if(llrEstimation>threshold) 
     llrEstimation=threshold;
-    //std::cout<<"sys estimate overflow!"<<std::endl;
-  }
   else if(llrEstimation<-threshold)
     llrEstimation=-threshold;
-  else ;
+  
   
   if(v>0)
     decision=0;

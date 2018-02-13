@@ -110,10 +110,8 @@ void complexAWGNChannel(vector<complex<double> > &signal, double sigma, int seed
   vector<double> realNoise = generateGaussianNum(0, sigma, length, seed);
   vector<double> imaginaryNoise = generateGaussianNum(0, sigma, length, seed+200);
 
-  for(int i=0;i<length;++i)
-    {
-      signal[i].real() += realNoise[i];
-      signal[i].imag() += imaginaryNoise[i];
-    }
+  for(int i=0;i<length;++i) {
+    signal[i] += complex<double>(realNoise[i], imaginaryNoise[i]);
+  }
   
 }
