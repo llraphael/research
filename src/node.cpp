@@ -3,7 +3,7 @@
 #include<map>
 #include<cmath>
 #include "node.h"
-#include "func.h"
+#include "function.h"
 
 
 const double threshold = 30;
@@ -509,118 +509,121 @@ void Coded_info :: computeInMeanAndVar(std::vector<Sys_info> &neiNode, double re
   
   std::vector<double> inMean(degree, 0);
   std::vector<double> inVar(degree, 0);
-  
+ 
+  // How to treat 0: 0 or -1
+  double zeroSym = 0;
+
   if(format == "llr") {
     std::vector<double> inMessage(degree, 0);
-    for(int index=0;index<degree;++index)
-      {
-	int neiNum = nodeData.neighbourNum[index];
-	int messageIndex = nodeData.inmessageIndex[index];
-
-	inMessage[index] = neiNode[neiNum].getMessage(messageIndex, identity);
-      }
+    for(int index=0;index<degree;++index) {
+      int neiNum = nodeData.neighbourNum[index];
+	    int messageIndex = nodeData.inmessageIndex[index];
+      inMessage[index] = neiNode[neiNum].getMessage(messageIndex, identity);
+    }
     
     for(int i=0; i<degree; i++) {
       double p1 = 1 / (1 + exp(inMessage[i]));
       double p0 = 1 - p1;
-      inMean[i] = 0 * p0 + 1 * p1;
-      //inVar[i] =  0.0001 + 1 + 2 * (p1 - p0) * inMean[i] + pow(inMean[i], 2); //Gau
-      inVar[i] = pow(0 - inMean[i], 2) * p0 + pow(1 - inMean[i], 2) * p1;
+      inMean[i] = zeroSym * p0 + 1 * p1;
+      inVar[i] = pow(zeroSym - inMean[i], 2) * p0 + pow(1 - inMean[i], 2) * p1;
     }
   }
-  if(format == "Gau") {
-    for(int index=0;index<degree;++index)
-      {
-	int neiNum = nodeData.neighbourNum[index];
-	int messageIndex = nodeData.inmessageIndex[index];
-	inMean[index] = neiNode[neiNum].nodeData.outMean[messageIndex];
-	inVar[index] = neiNode[neiNum].nodeData.outVar[messageIndex];
-      }
+  if(format == "Gaussian") {
+    for(int index=0;index<degree;++index) {
+	    int neiNum = nodeData.neighbourNum[index];
+	    int messageIndex = nodeData.inmessageIndex[index];
+	    inMean[index] = neiNode[neiNum].nodeData.outMean[messageIndex];
+	    inVar[index] = neiNode[neiNum].nodeData.outVar[messageIndex];
+    }
   }
   
   // weight * norFactor
-  std::vector<double> tempW(degree, 0);
+  std::vector<double> normalizedW(degree, 0);
   for(int i=0; i<degree; i++)
-    tempW[i] = weightset[i] * norFactor;
+    normalizedW[i] = weightset[i] * norFactor;
 
-  /*
-  // Get mean sum and mean variance
-  double meanSum = -1 * receivedSym;
-  for(int i=0; i<degree; i++)
-    meanSum += tempW[i] * inMean[i];
+  // Maintain analog message passing within RCM sub-block.
+  if(format == "Gaussian") {
+    // Get mean sum and mean variance
+    double meanSum = -1 * receivedSym;
+    for(int i=0; i<degree; i++)
+      meanSum += normalizedW[i] * inMean[i];
   
-  double varSum = noiseVar;
-  for(int i=0; i<degree; i++)
-    varSum += pow(tempW[i], 2) * inVar[i];
+    double varSum = noiseVar;
+    for(int i=0; i<degree; i++)
+      varSum += pow(normalizedW[i], 2) * inVar[i];
 
-  // compute each outgoing mean and variance
-  for(int i=0; i<degree; i++) {
-    nodeData.outMean[i] = -1 / tempW[i] * (meanSum - tempW[i] * inMean[i]);
-    nodeData.outVar[i] = 1 / pow(tempW[i], 2) * (varSum - pow(tempW[i], 2) * inVar[i]);
-  }
-  // compute each outgoing llr message
-  for(int i=0; i<degree; i++) {
-    double p0 = gaussianFunc(-1, nodeData.outMean[i], sqrt(nodeData.outVar[i]));
-    double p1 = gaussianFunc(1, nodeData.outMean[i], sqrt(nodeData.outVar[i]));
-   double message = log(p0 / p1);
-    if(message > threshold)
-      message = threshold;
-    if(message < -threshold)
-      message = -threshold;
-
-    setMessage(message, i);
-  }
-  */
-
-  
-  // New method
-  double symMinVal = symPro.begin() -> first;
-  double symMaxVal = symPro.rbegin() -> first;
-  double meanSum = 0;
-  for(int i=0; i<degree; i++) 
-    meanSum += weightset[i] * inMean[i];
-  double varSum = 0;
-  for(int i=0; i<degree; i++)
-    varSum += pow(weightset[i], 2) * inVar[i];
-
-  for(int i=0; i<degree; i++) {
-    double p0 = 0, p1 = 0;
-    double otherMean = meanSum - weightset[i] * inMean[i];
-    double otherSig = sqrt(varSum - pow(weightset[i], 2) * inVar[i]);
-    
-    std::map<int, double>::iterator it = symPro.begin();
-    for(it; it != symPro.end(); it++) {
-      //if(it -> second < pow(10, -10))
-      //continue;
-      //else {
-	double symVal = it -> first;
-	// pro being 1
-	double comVal = symVal - weightset[i] * 1;
-	if(comVal >= symMinVal && comVal <= symMaxVal)
-	  p1 += (it->second) * gaussianFunc(comVal, otherMean, otherSig);
-	// pro being 0
-	comVal = symVal - weightset[i] * (0);
-	if(comVal >= symMinVal && comVal <= symMaxVal)
-	  p0 += (it->second) * gaussianFunc(comVal, otherMean, otherSig);
-	//}
+    // compute each outgoing mean and variance
+    for(int i=0; i<degree; i++) {
+      nodeData.outMean[i] = -1 / normalizedW[i] * (meanSum - normalizedW[i] * inMean[i]);
+      nodeData.outVar[i] = 1 / pow(normalizedW[i], 2) * (varSum - pow(normalizedW[i], 2) * inVar[i]);
     }
-
-    double message = log(p0 / p1);
-    if(p0 == 0 || p1 == 0)
-      message = 0;
-
-    if(message > threshold)
-      message = threshold;
-    if(message < -threshold)
-      message = -threshold;
     
-    if(isnan(message))
-      std::cout << "problem" << std::endl;
-
-    setMessage(message, i);
+    // compute each outgoing llr message
+    for(int i=0; i<degree; i++) {
+      double p0 = gaussianFunc(zeroSym, nodeData.outMean[i], sqrt(nodeData.outVar[i]));
+      double p1 = gaussianFunc(1, nodeData.outMean[i], sqrt(nodeData.outVar[i]));
+      double message = log(p0 / p1);
+      if(message > threshold) message = threshold;
+      if(message < -threshold) message = -threshold;
+      setMessage(message, i);
+    }
   }
   
+  if(format == "llr") {
+  
+    double symMinVal = symPro.begin() -> first;
+    double symMaxVal = symPro.rbegin() -> first;
+    double meanSum = 0;
+    for(int i=0; i<degree; i++) 
+      meanSum += normalizedW[i] * inMean[i];
+    
+    double varSum = noiseVar;
+    for(int i=0; i<degree; i++)
+      varSum += pow(normalizedW[i], 2) * inVar[i];
 
+    for(int i=0; i<degree; i++) {
+      double meanOfLinearComb = meanSum - normalizedW[i] * inMean[i];
+      double varOfLinearComb = varSum - pow(normalizedW[i], 2) * inVar[i];
+      double message = 0;
+      if(zeroSym == -1)
+        message = (-2 * normalizedW[i] * (receivedSym - meanOfLinearComb)) / varOfLinearComb;
+      else
+        message = (pow(normalizedW[i], 2) - 2 * normalizedW[i] * (receivedSym - meanOfLinearComb)) / (2 * varOfLinearComb);
+      setMessage(message, i);
+    } 
+    /*
+    // ---- Method 3 ----
+    for(int i=0; i<degree; i++) {
+      double p0 = 0, p1 = 0;
+      double otherMean = meanSum - weightset[i] * inMean[i];
+      double otherSig = sqrt(varSum - pow(weightset[i], 2) * inVar[i]);
+    
+      std::map<int, double>::iterator it = symPro.begin();
+      for(it; it != symPro.end(); it++) {
+	      double symVal = it -> first;
+	      
+        // pro being 1
+	      double comVal = symVal - weightset[i] * 1;
+	      if(comVal >= symMinVal && comVal <= symMaxVal)
+	      p1 += (it->second) * gaussianFunc(comVal, otherMean, otherSig);
+	      
+        // pro being 0
+	      comVal = symVal - weightset[i] * 0;
+	      if(comVal >= symMinVal && comVal <= symMaxVal)
+	        p0 += (it->second) * gaussianFunc(comVal, otherMean, otherSig);
+      }
+
+      double message = log(p0 / p1);
+      if(p0 == 0 || p1 == 0)
+        message = 0;
+
+      if(message > threshold)  message = threshold;
+      if(message < -threshold)  message = -threshold;
+      if(isnan(message))  std::cout << "problem" << std::endl;
+      setMessage(message, i);
+    } */
+  }
 }
 
 
@@ -1026,7 +1029,6 @@ void Sys_info::computeMessage(std::vector<Coded_info> &neiNode1, std::vector<Cod
   else if(llrEstimation<-threshold)
     llrEstimation=-threshold;
   
-  
   if(v>0)
     decision=0;
   else
@@ -1049,33 +1051,36 @@ void Sys_info :: computeInMeanAndVar(std::vector<Coded_info> &neiNode1, std::vec
   std::vector<double> inVar(degree, 0);
   std::vector<double> inmessage2(para_degree, 0);
 
-  for(int index=0;index<degree;++index)
-    {
-      int neiNum=nodeData.neighbourNum[index];
-      int messageIndex=nodeData.inmessageIndex[index];
-      inMean[index] = neiNode1[neiNum].nodeData.outMean[messageIndex];
-      inVar[index] = neiNode1[neiNum].nodeData.outVar[messageIndex];
-    }
+  for(int index=0;index<degree;++index) {
+    int neiNum=nodeData.neighbourNum[index];
+    int messageIndex=nodeData.inmessageIndex[index];
+    inMean[index] = neiNode1[neiNum].nodeData.outMean[messageIndex];
+    inVar[index] = neiNode1[neiNum].nodeData.outVar[messageIndex];
+  }
 
-  for(int index=0;index<para_degree;++index)
-    {
-      int neiNum=nodeData.para_neighbourNum[index];
-      int messageIndex=nodeData.para_inmessageIndex[index];
-      double message=neiNode2[neiNum].getMessage(messageIndex);
-      inmessage2[index] = message;
-    }
+  for(int index=0;index<para_degree;++index) {
+    int neiNum=nodeData.para_neighbourNum[index];
+    int messageIndex=nodeData.para_inmessageIndex[index];
+    double message=neiNode2[neiNum].getMessage(messageIndex);
+    inmessage2[index] = message;
+  }
 
   // Compute outgoing mean and variance
-  double llrSum = log(p0 / (1 - p0));
+  // Assume 1 and 0 are used ???
+  double zeroSym = 0;
+  double p1 = 1 - p0;
+
+  // Transform llr messages from LDGM to mean and var.
+  double llrSum = log(p0 / p1);
   for(int i=0; i<para_degree; i++)
     llrSum += inmessage2[i];
-  double tempP1 = 1 / (1 + exp(llrSum));
-  double tempP0 = 1 - tempP1;
-  double rightMean = tempP0 * (-1) + tempP1 * 1;
-  double rightVar = 0.0001 + 1 + 2 * (tempP1 - tempP0) * rightMean + pow(rightMean, 2);
+  double llrP1 = 1 / (1 + exp(llrSum));
+  double llrP0 = 1 - llrP1;
+  double llrMean = llrP0 * zeroSym + llrP1 * 1;
+  double llrVar = llrP0 * pow(zeroSym - llrMean, 2) + llrP1 * pow(1 - llrMean, 2);
 
-  double meanDivVarSum = rightMean / rightVar;
-  double varInvSum = 1 / rightVar;
+  double meanDivVarSum = llrMean / llrVar;
+  double varInvSum = 1 / llrVar;
   for(int i=0; i<degree; i++) {
     meanDivVarSum += inMean[i] / inVar[i];
     varInvSum += 1 / inVar[i];
@@ -1086,19 +1091,21 @@ void Sys_info :: computeInMeanAndVar(std::vector<Coded_info> &neiNode1, std::vec
   }
 
   // Compute llr message to ldgm codes
-  meanDivVarSum -= rightMean / rightVar;
-  varInvSum -= 1 / rightVar;
-  double tempMean = meanDivVarSum / varInvSum;
-  double tempSig = sqrt(1 / varInvSum);
-  tempP0 = gaussianFunc(-1, tempMean, tempSig);
-  tempP1 = gaussianFunc(1, tempMean, tempSig);
-  llrSum += log(tempP0 / tempP1);
+  meanDivVarSum -= llrMean / llrVar;
+  varInvSum -= 1 / llrVar;
+  double rcmMean = meanDivVarSum / varInvSum;
+  double rcmSig = sqrt(1 / varInvSum);
+  double rcmP0 = gaussianFunc(zeroSym, rcmMean, rcmSig);
+  double rcmP1 = gaussianFunc(1, rcmMean, rcmSig);
+  llrSum += log(rcmP0 / rcmP1);
   for(int i=0; i<para_degree; i++) {
     double message = llrSum - inmessage2[i];
     if(message > threshold)
       message = threshold;
     if(message < -threshold)
       message = -threshold;
+    if(std::isnan(message)) 
+      std::cout << "sys out message nan!" << std::endl;
     setMessage(message, i, 2);
   }
 

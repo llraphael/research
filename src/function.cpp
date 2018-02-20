@@ -4,7 +4,7 @@
 #include<stdlib.h>
 #include<math.h>
 #include<time.h>
-#include "func.h"
+#include "function.h"
 
 using namespace std;
 
@@ -130,7 +130,7 @@ vector<complex<double> > modulatorQAM(vector<double> &symbols, double norfactor)
   
 }
 
-map<double, double> getSymbolSet(vector<double> &weightset, const double p1, double zeroProcess)
+map<int, double> getSymbolSet(vector<double> &weightset, const double p1, double zeroProcess)
 {
 
   int weightsize = weightset.size();
@@ -145,30 +145,28 @@ map<double, double> getSymbolSet(vector<double> &weightset, const double p1, dou
     double symbol = 0;
     for(int sysindex=0;sysindex<weightsize;++sysindex) {
       if(zeroProcess == -1)
-	symbol += (2*sysbits[sysindex]-1) * weightset[sysindex];
+        symbol += (2*sysbits[sysindex]-1) * weightset[sysindex];
       else
-	symbol += sysbits[sysindex] * weightset[sysindex];
+	      symbol += sysbits[sysindex] * weightset[sysindex];
     }
 
     symbolset.push_back(symbol);
     double pro = 1;
-    for(int sysindex=0;sysindex<weightsize;++sysindex)
-      {
-	if(sysbits[sysindex] == 0)
-	  pro *= (1-p1);
-	else
-	  pro *= p1;
-      }
+    for(int sysindex=0;sysindex<weightsize;++sysindex) {
+	    if(sysbits[sysindex] == 0)
+	      pro *= (1-p1);
+	    else
+	      pro *= p1;
+    }
     symbolpro.push_back(pro);
 
     int j = 0;
     ++sysbits[j];
     while(sysbits[j] == 2 && j<weightsize ) {
-      if(j == weightsize-1)
-	sysbits[j] = 0;
+      if(j == weightsize-1) sysbits[j] = 0;
       else {
-	sysbits[j] = 0;
-	++sysbits[++j];
+	      sysbits[j] = 0;
+	      ++sysbits[++j];
       }
     }
 
@@ -176,34 +174,28 @@ map<double, double> getSymbolSet(vector<double> &weightset, const double p1, dou
   }
 
   vector<double> symbol, procal;
-  for(i=0;i<symbolset.size();++i)
-    {
-      int j = 0;
-      for(j;j<symbol.size();++j)
-	{
-	  if(symbolset[i] == symbol[j]) {
-	    procal[j] += symbolpro[i];
-	    break;
-	  }
-	  else 
-	    continue;
-	}
-
-      if(j == symbol.size()) {                   // There is no symbol with the same value in the set
-	symbol.push_back(symbolset[i]);
-	procal.push_back(symbolpro[i]);
-      }
+  for(i=0;i<symbolset.size();++i) {
+    int j = 0;
+    for(j;j<symbol.size();++j) {
+	    if(symbolset[i] == symbol[j]) {
+	      procal[j] += symbolpro[i];
+	      break;
+	    } else  continue;
     }
+
+    if(j == symbol.size()) {                   // There is no symbol with the same value in the set
+	    symbol.push_back(symbolset[i]);
+	    procal.push_back(symbolpro[i]);
+    }
+  }
   
   vecNorm(procal);                               // Normalize the distribution of symbols.
 
-  map<double, double> symboldata;
+  map<int, double> symboldata;
   for(i=0;i<symbol.size();++i)
-    symboldata.insert( pair<double, double>(symbol[i], procal[i]) );
+    symboldata.insert( pair<int, double>(symbol[i], procal[i]) );
 
   return symboldata;
-
-
 }
 
 map<int, vector<vector<int> > > getMappingTable(vector<double> &weightSet, int zeroProcess) {

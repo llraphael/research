@@ -5,10 +5,10 @@
 #include<cmath>
 #include<fstream>
 #include<algorithm>
+
 #include"node.h"
 #include"sparsematrix.h"
-#include"func.h"
-#include"pcm.cpp"
+#include"function.h"
 
 using namespace std;
 
@@ -60,20 +60,20 @@ Matrix linearMatrixConsD8(int N, vector<int> &weight, int seed)
     ccm_matrix[i] = consEleMatrix(elematrixrow, elematrixcolumn, weight[i]);
 
 
- 	/* 
+ 	 
   //For weightset size of 8
   int horizontalseq[][4] = { {2, 3, 1, 0},
 			     {1, 0, 2, 3},
 			     {3, 2, 0, 1},
 			     {0, 1, 3, 2} };
-  */
   
+  /*
   //For weightset size of 16
    int horizontalseq[][8] = { {7, 6, 5, 4, 3, 2, 1, 0},
 			     {3, 2, 1, 0, 7, 6, 5, 4},
 			     {7, 6, 5, 4, 3, 2, 1, 0},
 			     {3, 2, 1, 0, 7, 6, 5, 4} };
-  
+  */
   //Four row elementary matrices group forms a whole matrix
   Matrix matrixhori[4]; 
 
@@ -124,10 +124,13 @@ int main()
   cout<<"Throughput is:"<<throughput<<endl;
   cout<<"channel capacity is: "<<capacity<<endl;
 
+  // The indicator for the message passing method:
+  // 1: Accurate message passing; 2: Simplified decoding.
+  int messageMethod = 2;
 
   //weightset
-  int wval[] = {1, 1, 1, 1, 2, 2, 2, 2};
-  //int wval[] = {2, 3, 4, 8};
+  //int wval[] = {1, 1, 1, 1, 2, 2, 2, 2};
+  int wval[] = {2, 3, 7, 10};
   
   int weightsize = 2 * sizeof(wval) / sizeof(int);
   vector<double> weightset(weightsize, 0);
@@ -143,7 +146,7 @@ int main()
 
   vector<int> weightval(wval, wval+weightsize/2);
  
-  map<int, double> symbolsetdata = getSymbolSet(weightset, p1);
+  map<int, double> symbolsetdata = getSymbolSet(weightset, p1, messageMethod == 1 ? 0 : 0);
   map<int, vector<vector<int> > > mappingTable = getMappingTable(weightset);
   vector<double> symbolset;
   vector<double> symbolpro;
@@ -255,12 +258,11 @@ int main()
 
   double norfactor = getNormalizationFactorQAM(symbolset, symbolpro);
   vector<double> normalizedSymbolset(symbolset);
-    for(int i=0;i<symbolset.size();++i)
+  for(int i=0;i<symbolset.size();++i)
       normalizedSymbolset[i] *= norfactor;
-  
-  // The indicator for the message passing method:
-  // 1: Accurate message passing; 2: Simplified decoding.
-  int messageMethod = 2;
+ 
+  // Allocate space for outgoing mean and variance if simplified method
+  // is used.
   if(messageMethod == 2) {
     for(int i=0; i<sysNumber; i++)  sysNodeInfo[i].allocateForMeanAndVar();
     for(int i=0; i<symbolNumber; i++)  symNodeInfo[i].allocateForMeanAndVar();
@@ -278,7 +280,8 @@ int main()
     systematicbits = sourceGenerator(sysNumber, p1, seed);
     
     vector<int> systrans(systematicbits);
-    linearEncoder(symNodeInfo, systematicbits, rpsymbols);       // Symbol Encoder 
+    // RCM encoding
+    linearEncoder(symNodeInfo, systematicbits, rpsymbols, 0, messageMethod == 1 ? 0 : 0);       
     encoder(codedNodeInfo, systematicbits, codedbits);           // Digital bits Encoder
     
     vector<complex<double> > channelSignals;
@@ -346,7 +349,7 @@ int main()
       // Standard message calculation.
       if(messageMethod == 1) {
         for(int i=0;i<symbolNumber;++i)
-				  symNodeInfo[i].computePdf(sysNodeInfo, channelPdf[i], norfactor, pow(sigma, 2), 1, i); 
+				  symNodeInfo[i].computePdf(sysNodeInfo, channelPdf[i], norfactor, noiseVar, 1, i); 
         for(int i=0;i<codedNumber;++i)
 				  codedNodeInfo[i].computeMessage(sysNodeInfo, codedChannelOutput[i], 2);
         for(int i=0;i<sysNumber;++i)
