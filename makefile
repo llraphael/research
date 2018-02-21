@@ -76,5 +76,9 @@ $(BUILDDIR)/node.o : $(INCDIR)/node.h $(SRCDIR)/node.cpp
 $(BUILDDIR)/pcm.o : $(INCDIR)/function.h $(SRCDIR)/pcm.cpp
 	$(CC) $(CFLAGS) $(INC) $(SRCDIR)/pcm.cpp -o $@
 
+start:
+	mkdir -p $(BUILDDIR) $(TARGET)	
+
 clean:
 	rm ./$(BUILDDIR)/*.o
+
