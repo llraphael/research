@@ -1632,10 +1632,10 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 	}
 
 	// Normalize probability mass from RP.
-	double pTotalFromRP = p0FromRP + p1FromRP + p2FromRP;
-	p0FromRP /= pTotalFromRP;
-	p1FromRP /= pTotalFromRP;
-	p2FromRP /= pTotalFromRP;
+	double pTotal = p0FromRP + p1FromRP + p2FromRP;
+	p0FromRP /= pTotal;
+	p1FromRP /= pTotal;
+	p2FromRP /= pTotal;
 
 	// Combine messages from coded nodes
 	double LLRFromLDGM1 = 0, LLRFromLDGM2 = 0;
@@ -1653,14 +1653,19 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 	double p1FromCoded = p0FromCoded1 * p1FromCoded2 + p1FromCoded1 * p0FromCoded2;
 	double p2FromCoded = p1FromCoded1 * p1FromCoded2;
 
+  pTotal = p0FromCoded + p1FromCoded + p2FromCoded;
+  p0FromCoded = p0FromCoded / pTotal;
+  p1FromCoded = p1FromCoded / pTotal;
+  p2FromCoded = p2FromCoded / pTotal;
+
 	// Combine everything and normalize them.
 	double p0Final = p0FromCoded * p0FromRP * channelInfo[2] * (1 - p) * 0.5;
 	double p1Final = p1FromCoded * p1FromRP * channelInfo[3] * p;
 	double p2Final = p2FromCoded * p2FromRP * channelInfo[4] * (1 - p) * 0.5;
-	double pTotalFinal = p0Final + p1Final + p2Final;
-	p0Final /= pTotalFinal;
-	p1Final /= pTotalFinal;
-	p2Final /= pTotalFinal;
+	double pTotal = p0Final + p1Final + p2Final;
+	p0Final /= pTotal;
+	p1Final /= pTotal;
+	p2Final /= pTotal;
 	
 	// Compute the message to the synthetic RP nodes
 	vector<vector<double> > outPdf(degree, vector<double>(5, 0));
