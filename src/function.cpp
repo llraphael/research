@@ -1662,7 +1662,7 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 	double p0Final = p0FromCoded * p0FromRP * channelInfo[2] * (1 - p) * 0.5;
 	double p1Final = p1FromCoded * p1FromRP * channelInfo[3] * p;
 	double p2Final = p2FromCoded * p2FromRP * channelInfo[4] * (1 - p) * 0.5;
-	double pTotal = p0Final + p1Final + p2Final;
+	pTotal = p0Final + p1Final + p2Final;
 	p0Final /= pTotal;
 	p1Final /= pTotal;
 	p2Final /= pTotal;
