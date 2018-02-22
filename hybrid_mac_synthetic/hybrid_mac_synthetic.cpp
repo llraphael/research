@@ -15,7 +15,6 @@
 
 using namespace std;
 
-
 void printPdf(const vector<double> &pdf)
 {
   for(int i=0;i<pdf.size();++i)
@@ -71,13 +70,13 @@ Matrix linearMatrixConsD8(int N, vector<int> &weight, int seed)
 			     {1, 0} };
   */
 
- 	/* 
+ 	
   //For weightset size of 8
   int horizontalseq[][4] = { {2, 3, 1, 0},
 			     {1, 0, 2, 3},
 			     {3, 2, 0, 1},
 			     {0, 1, 3, 2} };
-  */
+  
   
   //For weightset size of 16
   /*
@@ -86,11 +85,12 @@ Matrix linearMatrixConsD8(int N, vector<int> &weight, int seed)
 			     {7, 6, 5, 4, 3, 2, 1, 0},
 			     {3, 2, 1, 0, 7, 6, 5, 4} };
  */
+  /*
   int horizontalseq[][8] = { {7, 3, 6, 2, 5, 1, 4, 0},
 			     {0, 4, 1, 5, 2, 6, 3, 7},
 			     {4, 3, 5, 2, 6, 0, 7, 1},
 			     {2, 6, 3, 7, 0, 5, 1, 4} };
-	 
+	 */
   //Four row elementary matrices group forms a whole matrix
   Matrix matrixhori[4]; 
 
@@ -128,7 +128,7 @@ int main() {
   int sysNumber = 10000;
   int symbolNumber = 8000;
   int codedNumber = 12000;
-  int sysDegree = 25;
+  int sysDegree = 18;
   
   double p1 = 0.5;    //sparsity of the source.
   double p0 = 1 - p1;
@@ -153,8 +153,8 @@ int main() {
 
 
   //weightset
-  int wval[] = {1, 1, 1, 1, 2, 2, 2, 2};
-  //int wval[] = {2, 3, 4, 8};
+  //int wval[] = {1, 1, 1, 1, 2, 2, 2, 2};
+  int wval[] = {2, 3, 4, 8};
   //int wval[] = {1, 2};
   int weightSize = 2 * sizeof(wval) / sizeof(int);
   vector<double> weightset(weightSize, 0);
@@ -216,12 +216,11 @@ int main() {
     }
 
   // Generate two different LDGM generator matrices.
-	vector<multimap<int, int> > maData1 = paritycm(sysNumber, codedNumber, sysDegree, sysNumber, 2750);
+	vector<multimap<int, int> > maData1 = paritycm(sysNumber, codedNumber, sysDegree, sysNumber, 2250);
 	multimap<int, int> onePositionByRow1(maData1[0]);
 	multimap<int, int> onePositionByColumn1(maData1[1]);
 
 	vector<multimap<int, int> > maData2 = paritycm(sysNumber, codedNumber, sysDegree, sysNumber, 3350);
-
 	multimap<int, int> onePositionByRow2(maData2[0]);
 	multimap<int, int> onePositionByColumn2(maData2[1]);
 
@@ -240,20 +239,20 @@ int main() {
 	gmatrix1.organizebyCol();
 	for(int index=0;index<sysNumber;++index) {
 		sysNodeInfo1[index].readLinearMatrix(gmatrix1, index, symbolNumber, 1);
-    	sysNodeInfo2[index].readLinearMatrix(gmatrix1, index, symbolNumber, 1);
+    sysNodeInfo2[index].readLinearMatrix(gmatrix1, index, symbolNumber, 1);
   
 		sysNodeInfo1[index].readNeighbourNum(onePositionByRow1, index, 2);
-		sysNodeInfo2[index].readNeighbourNum(onePositionByRow2, index, 2);
-	}
+		sysNodeInfo2[index].readNeighbourNum(onePositionByRow1, index, 2);
+  }
 
-  	for(int index=0;index<symbolNumber;++index) {
-		symNodeInfo1[index].readLinearMatrix(gmatrix1, index);
-		symNodeInfo2[index].readLinearMatrix(gmatrix1, index);
-  	}
+  for(int index=0;index<symbolNumber;++index) {
+    symNodeInfo1[index].readLinearMatrix(gmatrix1, index);
+    symNodeInfo2[index].readLinearMatrix(gmatrix1, index);
+  }
 
 	for(int index=0; index<codedNumber; ++index) {
 		codedNodeInfo1[index].readNeighbourNum(onePositionByColumn1, index);
-		codedNodeInfo2[index].readNeighbourNum(onePositionByColumn2, index);
+		codedNodeInfo2[index].readNeighbourNum(onePositionByColumn1, index);
 	}
  
 	// Each Sys node get the storage index of its connections.
@@ -274,7 +273,6 @@ int main() {
 		codedNodeInfo2[index].getsourceNum(sysNodeInfo2, index, 2);
 	}
  
-
 	// Calculate the average value of transimitted symbols
 	double Es = 2;
 	double Esender = Es / 2;
@@ -292,7 +290,6 @@ int main() {
   vector<double> rpsymbols1(symbolNumber, 0);
   vector<double> rpsymbols2(symbolNumber, 0);
   
-  
   // Our assumption is that the generated symbols are symmetric, i.e
   // the number of possible symbols is odd and symmetric to zero.
   // The length of the vector should be determined by the largest value
@@ -302,17 +299,17 @@ int main() {
   int symSumPdfSize = symbolset[symbolset.size() - 1] * 2 * 2 + 1; 
   
 	// PDF message from channel(synthetic symbols)
-	vector< vector<double> > channelPdf(symbolNumber, vector<double>(symSumPdfSize, 0));        
+	vector<vector<double> > channelPdf(symbolNumber, vector<double>(symSumPdfSize, 0));        
   
-	// Channel messages for systematic nodes.
+	// Channel messages (PDF and LLR) for systematic nodes.
 	vector<vector<double> > sysChannelOutput(sysNumber, vector<double>(5, 0));  
 	vector<double> sysChannelLLR(sysNumber, 0);
 
-	// Channel messages for coded nodes.
+	// Channel messages (PDF) for coded nodes.
 	vector<double> codedChannelOutput(codedNumber, 0);
 
 	// Channel information.
-	double gap = 1;
+	double gap = 0.5;
 	double snr = capacity + gap;
   double sigma = sqrt( Eso / (2 * pow(10, snr/10)) ); 
   double noiseVar = pow(sigma, 2);
@@ -336,7 +333,8 @@ int main() {
   string errorFileName = "mac_hybridsynthetic_w4142_" + std::to_string(static_cast<long long>(symbolNumber)) + "_" +
 		                     std::to_string(static_cast<long long>(codedNumber)) + "_" + std::to_string(static_cast<long long>(sysDegree)) +
 		                     "_p" + pString + "_" + gapString + "db.txt";
-	error.open("test.txt", ios::out);
+	string dataDir = "data/hybrid_mac_synthetic/";
+  error.open(dataDir + errorFileName, ios::out);
 
   ofstream erroreachblock;
   //erroreachblock.open("err_m4_2500_5_001_t10_2p5db.txt", ios::out);
@@ -386,9 +384,7 @@ int main() {
       if(random < sysDiffThreshold) {
 				systematicBits2[i] = 1 ^ systematicBits1[i];
 				count++;
-		}
-      else
-				systematicBits2[i] = systematicBits1[i];
+		  } else  systematicBits2[i] = systematicBits1[i];
     }
     systematicBits2[0] = 0;
 
@@ -406,7 +402,7 @@ int main() {
 		encoder(codedNodeInfo2, systematicBits2, codedBits2);
 
 		// Interleaver
-		interleaver(codedBits1, 0.7, sysNodeInfo1, codedNodeInfo1, codedNumber, 2);
+		interleaver(codedBits1, 1, sysNodeInfo1, codedNodeInfo1, codedNumber, 2);
 
     // Channel symbol
     vector<complex<double> > channelSignals;
@@ -457,9 +453,9 @@ int main() {
 				y = channelSignals[index/2].imag();
 
       // 0,0 --> -2; 0, 1 or 1, 0 --> 0; 1, 1 --> 2.
-	double pSumM2 =  gaussianFunc(y, (-2) / sqrt(2) * sqrt(Esender), sigma);            
-	double pSum0 = gaussianFunc(y, 0, sigma);    
-	double pSum2 = gaussianFunc(y, 2 / sqrt(2) * sqrt(Esender), sigma);     
+      double pSumM2 =  gaussianFunc(y, (-2) / sqrt(2) * sqrt(Esender), sigma);            
+	    double pSum0 = gaussianFunc(y, 0, sigma);    
+	    double pSum2 = gaussianFunc(y, 2 / sqrt(2) * sqrt(Esender), sigma);     
 
 			sysChannelOutput[index] = vector<double> {0, 0, pSumM2, pSum0, pSum2};
 			vecNorm(sysChannelOutput[index]);
@@ -480,7 +476,7 @@ int main() {
 			else
 	  		y = channelSignals[(sysNumber + index) / 2].imag();
 
-			vector<double> symdis(symSumPdfSize);
+			vector<double> symdis(symSumPdfSize, 0);
       
 			for(set<int>::iterator it=symSumSet.begin(); it!=symSumSet.end(); it++) {
 	    	int zepoint = (symSumPdfSize - 1) / 2;
@@ -501,7 +497,6 @@ int main() {
 			else
 				y = channelSignals[(sysNumber + symbolNumber + index) / 2].imag();
 
-
 			// 0,0 --> -2; 0, 1 or 1, 0 --> 0; 1, 1 --> 2.
 			double pSumM2 =  gaussianFunc(y, (-2) / sqrt(2) * sqrt(Esender), sigma);            
       double pSum0 = gaussianFunc(y, 0, sigma);    
@@ -514,7 +509,7 @@ int main() {
 			+ exp(-pow(y, 2) / (2 * pow(sigma, 2)))) /		
 			(exp(-pow(y - 2 * sqrt(Es1),2)/(2*pow(sigma,2)))	
 			+ exp(-pow(y, 2) / (2 * pow(sigma, 2)))));                
-		*/
+		  */
 			codedNodeInfo1[index].clearMessage();
 			codedNodeInfo2[index].clearMessage();
 		}
@@ -530,7 +525,6 @@ int main() {
     vector<int> predecision2(sysNumber, 0);
     int sametime = 0;
 
-		
 		// Track pdf message obtained from RP and coded nodes.
 		ofstream trackRPPro;
 		trackRPPro.open("proTrack.txt", ios::out);
@@ -641,7 +635,7 @@ int main() {
   erroreachblock.close();
 } 
 
-void updateChannelInfo(vector<complex<double> >& channelSignals, double Esender, double sigma, int start, vector<Coded_info>& codedNodeInfo, vector<double>& codedChannelOutput) {
+void updateChannelInfo(vector<complex<double> >& channelSignals, double Esender, double noiseVar, int start, vector<Coded_info>& codedNodeInfo, vector<double>& codedChannelOutput) {
 	
 	int codedNumber = codedChannelOutput.size();
 
@@ -653,13 +647,13 @@ void updateChannelInfo(vector<complex<double> >& channelSignals, double Esender,
 					y = channelSignals[(start + i) / 2].imag();
 
 				double estimate = codedNodeInfo[i].message_to_state;
-				double nominator1 = exp(-pow(y,2) / (2*pow(sigma, 2))) / exp(estimate);
-				double nominator2 = (exp(-pow(y+2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))));
-				double denominator1 = exp(-pow(y-2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))) / exp(estimate);
-				double denominator2 = (exp(-pow(y, 2) / (2 * pow(sigma, 2))));
+				double nominator1 = exp(-pow(y,2) / (2 * noiseVar)) / exp(estimate);
+				double nominator2 = exp(-pow(y + 2 / sqrt(2) * sqrt(Esender), 2) / (2 * noiseVar));
+				double denominator1 = exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * noiseVar)) / exp(estimate);
+				double denominator2 = (exp(-pow(y, 2) / (2 * noiseVar)));
 
 				if(std::isinf(nominator1) && std::isinf(denominator1)) {
-					codedChannelOutput[i] = log(exp(-pow(y, 2) / (2 * pow(sigma, 2))) / exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * pow(sigma, 2))));
+					codedChannelOutput[i] = log(exp(-pow(y, 2) / (2 * noiseVar)) / exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * noiseVar)));
 				} else {
 					codedChannelOutput[i] = log((nominator1 + nominator2) / (denominator1 + denominator2));
 				}
@@ -668,8 +662,7 @@ void updateChannelInfo(vector<complex<double> >& channelSignals, double Esender,
 
 }
 
-vector<int> interleaver(vector<int> &source, double percentage, vector<Sys_info> &sysNode, vector<Coded_info> &codedInfo, int codedNoP, int group)
-{
+vector<int> interleaver(vector<int> &source, double percentage, vector<Sys_info> &sysNode, vector<Coded_info> &codedInfo, int codedNoP, int group) {
 
   int interleavingNum = int(codedNoP * percentage);
 

@@ -22,6 +22,7 @@ OBJS3 = $(BUILDDIR)/hybrid_mac_inde.o $(BUILDDIR)/pcm.o $(COMMON_OBJS)
 OBJS4 = $(BUILDDIR)/rcm_mac.o $(COMMON_OBJS) 
 OBJS5 = $(BUILDDIR)/hybrid_pam.o $(BUILDDIR)/pcm.o $(COMMON_OBJS)
 OBJS6 = $(BUILDDIR)/hybrid_mac_synthetic.o $(BUILDDIR)/pcm.o $(COMMON_OBJS)
+OBJS7 = $(BUILDDIR)/rcm_mac_synthetic.o $(COMMON_OBJS)
 
 # For hybrid schemes on AWGN channels, including asymmetric sources and simplified methods.
 rcm : $(OBJS1)
@@ -40,6 +41,8 @@ $(TARGET)/hybrid_pam : $(OBJS5)
 # For MAC channel synthetic decoding.
 hybrid_mac_syn : $(OBJS6)
 	$(CC) $(LFLAGS) $(OBJS6) -o $(TARGET)/$@
+rcm_mac_syn : $(OBJS7)
+	$(CC) $(LFLAGS) $(OBJS7) -o $(TARGET)/$@
 
 $(BUILDDIR)/rcm.o : $(INCDIR)/node.h $(INCDIR)/sparsematrix.h $(INCDIR)/function.h point_to_point/rcm.cpp
 	$(CC) $(CFLAGS) $(INC) point_to_point/rcm.cpp -o $@
@@ -50,16 +53,17 @@ $(BUILDDIR)/hybrid.o : $(INCDIR)/node.h $(INCDIR)/sparsematrix.h $(INCDIR)/funct
 $(BUILDDIR)/hybrid_mac_inde.o : $(INCDIR)/node.h $(INCDIR)/sparsematrix.h $(INCDIR)/function.h hybrid_mac_independent/hybrid_mac_inde.cpp
 	$(CC) $(CFLAGS) $(INC) hybrid_mac_independent/hybrid_mac_inde.cpp -o $@
 
-$(BUILDDIR)/hybrid_mac_synthetic.o : $(INCDIR)/node.h $(INCDIR)/sparsematrix.h $(INCDIR)/function.h hybrid_mac_synthetic/hybrid_mac_synthetic.cpp
-	$(CC) $(CFLAGS) $(INC) hybrid_mac_synthetic/hybrid_mac_synthetic.cpp -o $@
-
 $(BUILDDIR)/hybrid_pam.o : node.h sparsematrix.h func.h hybrid_pam.cpp
 	$(CC) $(CFLAGS) $(INC) hybrid_pam.cpp
 
 $(BUILDDIR)/rcm_mac.o : node.h sparsematrix.h func.h rcm_mac.cpp
 	$(CC) $(CFLAGS) $(INC) rcm_mac.cpp
 
-$(BUILDDIR)/hybrid_mac_syn.o : $(INCDIR)/node.h $(INCDIR)/sparsematrix.h $(INCDIR)/function.h hybrid_mac_synthetic/hybrid_mac_syn.cpp
+$(BUILDDIR)/hybrid_mac_synthetic.o : $(INCDIR)/node.h $(INCDIR)/sparsematrix.h $(INCDIR)/function.h hybrid_mac_synthetic/hybrid_mac_synthetic.cpp
+	$(CC) $(CFLAGS) $(INC) hybrid_mac_synthetic/hybrid_mac_synthetic.cpp -o $@
+
+$(BUILDDIR)/rcm_mac_synthetic.o : $(INCDIR)/node.h $(INCDIR)/sparsematrix.h $(INCDIR)/function.h hybrid_mac_synthetic/rcm_mac_synthetic.cpp
+	$(CC) $(CFLAGS) $(INC) hybrid_mac_synthetic/rcm_mac_synthetic.cpp -o $@
 
 $(BUILDDIR)/channel.o : $(INCDIR)/function.h $(SRCDIR)/channel.cpp
 	$(CC) $(CFLAGS) $(INC) $(SRCDIR)/channel.cpp -o $@ 

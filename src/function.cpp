@@ -1603,12 +1603,14 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 	vector<double> inLLR1(paraDegree);
 	vector<double> inLLR2(paraDegree);
 
+  // Get incoming pdf messages from neighboring synthetic RP symbol nodes. 
 	for(int i=0; i<degree; i++) {
 		int neiNum = sysNodeInfo1.nodeData.neighbourNum[i];
 		int messageIndex = sysNodeInfo1.nodeData.inmessageIndex[i];
 		inPdfMessage[i] = pdfMessageFromRP[neiNum][messageIndex];
 	}
 
+  // Get incoming llr messagesing from neighboring coded bit nodes, including nodes from LDGM1 and LDGM2.
 	for(int i=0; i<paraDegree; i++) {
 		int neiNum1 = sysNodeInfo1.nodeData.para_neighbourNum[i];
 		int messageIndex1 = sysNodeInfo1.nodeData.para_inmessageIndex[i];
@@ -1629,7 +1631,7 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 		p2FromRP *= inPdfMessage[i][4];
 	}
 
-	// Normalization probability mass from RP.
+	// Normalize probability mass from RP.
 	double pTotalFromRP = p0FromRP + p1FromRP + p2FromRP;
 	p0FromRP /= pTotalFromRP;
 	p1FromRP /= pTotalFromRP;
