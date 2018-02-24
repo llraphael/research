@@ -133,7 +133,7 @@ int main() {
   
   double p1 = 0.5;    //sparsity of the source.
   double p0 = 1 - p1;
-  double p = 0.01; // correlation between source 1 and source 2.
+  double p = 0.1; // correlation between source 1 and source 2.
 
   string modulationMethod = "PAM";
 
@@ -151,7 +151,7 @@ int main() {
   // In terms of Eso/N0 considering QAM.
   double capacity = 10 * log10((pow(2, R) - 1) / (4 * codeRate));
   if(modulationMethod == "PAM")
-    capacity = 10 * log10((pow(2, 2 * R) - 1) / (2 * R) * entropy / 2);     // in terms of Eso/N0
+    capacity = 10 * log10((pow(2, 2 * R) - 1) / (4 * codeRate));     // in terms of Eso/N0
   //double capacity = 10 * log10((pow(2, 2 * R) - 1) / 2);     // Channel capacity in terms of Es/N0.
 
   cout<<"Code rate is: "<<codeRate<<endl;
@@ -286,6 +286,7 @@ int main() {
 	double Es1 = Esender, Es2 = Esender;
 
  	double Eso = Es / (4 * codeRate);
+  if(modulationMethod == "PAM")  Eso = Es / (2 * codeRate);
 
 	cout << "energy per source bit is:" << Eso << endl;
 
