@@ -122,17 +122,20 @@ double getSymPdf(vector<double> symbolSet, vector<double> estimate, double candi
 int countError(vector<Sys_info> &sysNodeInfo, vector<int> &systrans);
 vector<int> interleaver(vector<int> &source, double percentage, vector<Sys_info> &sysNode, vector<Coded_info> &codedInfo, int codedNoP, int group);
 void updateChannelInfo(vector<complex<double> >& channelSignals, double Esender, double sigma, int start, vector<Coded_info>& codedNodeInfo, vector<double>& codedChannelOutput);
-
+void updateChannelInfo(vector<double>& channelSignals, double Esender, double noiseVar, int start, vector<Coded_info>& codedNodeInfo, vector<double>& codedChannelOutput);
+ 
 int main() {
   // Source info
   int sysNumber = 10000;
-  int symbolNumber = 8000;
-  int codedNumber = 12000;
+  int symbolNumber = 10000;
+  int codedNumber = 10000;
   int sysDegree = 18;
   
   double p1 = 0.5;    //sparsity of the source.
   double p0 = 1 - p1;
   double p = 0.01; // correlation between source 1 and source 2.
+
+  string modulationMethod = "PAM";
 
   double H_U1_givenU2 = -p*log2(p) - (1 - p) * log2(1 - p);
   double H_U2 = 1;
@@ -140,17 +143,21 @@ int main() {
 	
   double codeRate = double(sysNumber) / (sysNumber + symbolNumber + codedNumber);
   double R = (H_U1_givenU2 + H_U2) * codeRate * 2;
+  if(modulationMethod == "PAM")  R /= 2;
+
   double throughput = codeRate * 2;
-  
-  double capacity = 10 * log10((pow(2, R) - 1) / (4 * codeRate));   // in terms of Eso/N0
-  //double capacity = 10 * log10((pow(2, 2 * R) - 1) / (2 * R) * entropy / 2);     // in terms of Eso/N0
+  if(modulationMethod == "PAM")  throughput = codeRate;
+ 
+  // In terms of Eso/N0 considering QAM.
+  double capacity = 10 * log10((pow(2, R) - 1) / (4 * codeRate));
+  if(modulationMethod == "PAM")
+    capacity = 10 * log10((pow(2, 2 * R) - 1) / (2 * R) * entropy / 2);     // in terms of Eso/N0
   //double capacity = 10 * log10((pow(2, 2 * R) - 1) / 2);     // Channel capacity in terms of Es/N0.
 
   cout<<"Code rate is: "<<codeRate<<endl;
   cout<<"entropy is: "<<entropy<<endl;
   cout<<"Throughput is:"<<throughput<<endl;
   cout<<"channel capacity is: "<<capacity<<endl;
-
 
   //weightset
   //int wval[] = {1, 1, 1, 1, 2, 2, 2, 2};
@@ -242,7 +249,7 @@ int main() {
     sysNodeInfo2[index].readLinearMatrix(gmatrix1, index, symbolNumber, 1);
   
 		sysNodeInfo1[index].readNeighbourNum(onePositionByRow1, index, 2);
-		sysNodeInfo2[index].readNeighbourNum(onePositionByRow1, index, 2);
+		sysNodeInfo2[index].readNeighbourNum(onePositionByRow2, index, 2);
   }
 
   for(int index=0;index<symbolNumber;++index) {
@@ -252,7 +259,7 @@ int main() {
 
 	for(int index=0; index<codedNumber; ++index) {
 		codedNodeInfo1[index].readNeighbourNum(onePositionByColumn1, index);
-		codedNodeInfo2[index].readNeighbourNum(onePositionByColumn1, index);
+		codedNodeInfo2[index].readNeighbourNum(onePositionByColumn2, index);
 	}
  
 	// Each Sys node get the storage index of its connections.
@@ -309,7 +316,7 @@ int main() {
 	vector<double> codedChannelOutput(codedNumber, 0);
 
 	// Channel information.
-	double gap = 0.5;
+	double gap = -1;
 	double snr = capacity + gap;
   double sigma = sqrt( Eso / (2 * pow(10, snr/10)) ); 
   double noiseVar = pow(sigma, 2);
@@ -345,7 +352,13 @@ int main() {
   double error_max = 0;
   double error_ave;
 
-  double norFactor = getNormalizationFactorQAM(symbolset, symbolpro);
+  double norFactor = 1;
+  if(modulationMethod == "QAM") 
+    norFactor = getNormalizationFactorQAM(symbolset, symbolpro);
+  else  
+    norFactor = getNormalizationFactorPAM(symbolset, symbolpro);
+  double digitalNorFactor = 1;
+  if(modulationMethod == "QAM")  digitalNorFactor = 1 / sqrt(2);
 
 	// Because of synthetic decoding, messages passed between synthetic
 	// RP nodes and synthetic sys nodes are pdfs. In order to facilitate
@@ -406,56 +419,74 @@ int main() {
 
     // Channel symbol
     vector<complex<double> > channelSignals;
+    vector<double> channelSignalsPAM;
+
+    if(modulationMethod == "QAM") {
+      // Generate channel symbol for systematic bits. Notice that we for sender i,
+      // we have to satisfy the requirement that the average energy is Es_i, which
+      // is 1 here, for conveniece.
+      for(int i=0; i<sysNumber; i=i+2) {
+        double tempAX = (2 * systematicBits1[i] - 1) * digitalNorFactor * sqrt(Es1);
+        double tempAY = (2 * systematicBits1[i+1] - 1) * digitalNorFactor * sqrt(Es1);
+        complex<double> digitSignalA = complex<double>(tempAX, tempAY);
+
+        double tempBX = (2 * systematicBits2[i] - 1) * digitalNorFactor * sqrt(Es2);
+        double tempBY = (2 * systematicBits2[i+1] - 1) * digitalNorFactor * sqrt(Es2);
+        complex<double> digitSignalB = complex<double>(tempBX, tempBY);
+        channelSignals.push_back(digitSignalA + digitSignalB);
+      } 
+
+      // Generate channel symbol for RP symbol, QAM. Since normalized RP symbol point energy is 1 and now each assigned point energy
+      // is Es/2, normalized factor should be adjusted.
+      vector<complex<double> > tempChannelSignals1 = modulatorQAM(rpsymbols1, norFactor);
+      vector<complex<double> > tempChannelSignals2 = modulatorQAM(rpsymbols2, norFactor);
+      for(int i=0; i<tempChannelSignals1.size(); i++)
+        channelSignals.push_back(tempChannelSignals1[i] + tempChannelSignals2[i]);
     
-    // Generate channel symbol for systematic bits. Notice that we for sender i,
-    // we have to satisfy the requirement that the average energy is Es_i, which
-    // is 1 here, for conveniece.
-    for(int i=0; i<sysNumber; i=i+2) {
-      double tempAX = (2 * systematicBits1[i] - 1) / sqrt(2) * sqrt(Es1);
-      double tempAY = (2 * systematicBits1[i+1] - 1) / sqrt(2) * sqrt(Es1);
-      complex<double> digitSignalA = complex<double>(tempAX, tempAY);
+      // Generate channel symbols for coded bits. The process is the same as that in systematic bits.
+      for(int i=0; i<codedNumber; i=i+2) {
+        double tempAX = (2 * codedBits1[i] - 1) * digitalNorFactor * sqrt(Es1);
+        double tempAY = (2 * codedBits1[i+1] - 1) * digitalNorFactor * sqrt(Es1);
+        complex<double> digitSignalA = complex<double>(tempAX, tempAY);
 
-      double tempBX = (2 * systematicBits2[i] - 1) / sqrt(2) * sqrt(Es2);
-      double tempBY = (2 * systematicBits2[i+1] - 1) / sqrt(2) * sqrt(Es2);
-      complex<double> digitSignalB = complex<double>(tempBX, tempBY);
-      channelSignals.push_back(digitSignalA + digitSignalB);
-    } 
+        double tempBX = (2 * codedBits2[i] - 1) * digitalNorFactor * sqrt(Es2);
+        double tempBY = (2 * codedBits2[i+1] - 1) * digitalNorFactor * sqrt(Es2);
+        complex<double> digitSignalB = complex<double>(tempBX, tempBY);
+        channelSignals.push_back(digitSignalA + digitSignalB);
+      }
 
-    // Generate channel symbol for RP symbol, QAM. Since normalized RP symbol point energy is 1 and now each assigned point energy
-    // is Es/2, normalized factor should be adjusted.
-    vector<complex<double> > tempChannelSignals1 = modulatorQAM(rpsymbols1, norFactor);
-    vector<complex<double> > tempChannelSignals2 = modulatorQAM(rpsymbols2, norFactor);
-    for(int i=0; i<tempChannelSignals1.size(); i++)
-      channelSignals.push_back(tempChannelSignals1[i] + tempChannelSignals2[i]);
-    
-    // Generate channel symbols for coded bits. The process is the same as that in systematic bits.
-    for(int i=0; i<codedNumber; i=i+2) {
-      double tempAX = (2 * codedBits1[i] - 1) / sqrt(2) * sqrt(Es1);
-      double tempAY = (2 * codedBits1[i+1] - 1) / sqrt(2) * sqrt(Es1);
-      complex<double> digitSignalA = complex<double>(tempAX, tempAY);
-
-      double tempBX = (2 * codedBits2[i] - 1) / sqrt(2) * sqrt(Es2);
-      double tempBY = (2 * codedBits2[i+1] - 1) / sqrt(2) * sqrt(Es2);
-      complex<double> digitSignalB = complex<double>(tempBX, tempBY);
-      channelSignals.push_back(digitSignalA + digitSignalB);
+      // Send symbols through complex AWGN channel
+      complexAWGNChannel(channelSignals, sigma);                 
+    } else {
+      for(int i=0; i<sysNumber; i++) {
+        double tmp = 2 * systematicBits1[i] - 1 + 2 * systematicBits2[i] - 1;
+        channelSignalsPAM.emplace_back(tmp);
+      }
+      for(int i=0; i<symbolNumber; i++) {
+        double tmp = norFactor * rpsymbols1[i] + norFactor * rpsymbols2[i];
+        channelSignalsPAM.emplace_back(tmp);
+      }
+      for(int i=0; i<codedNumber; i++) {
+        double tmp = 2 * codedBits1[i] - 1 + 2 * codedBits2[i] - 1;
+        channelSignalsPAM.emplace_back(tmp);
+      }
+      AWGNChannel(channelSignalsPAM, sigma);
     }
-
-    // Send symbols through complex AWGN channel
-    complexAWGNChannel(channelSignals, sigma);                 
-
 		// Initialization for sys nodes
     for(int index=0;index<sysNumber;++index) {
 
-      double y;     
-      if(index % 2 == 0)
-				y = channelSignals[index/2].real();
-      else
-				y = channelSignals[index/2].imag();
+      double y = 0;
+      if(modulationMethod == "QAM") {
+        if(index % 2 == 0)
+				  y = channelSignals[index/2].real();
+        else
+				  y = channelSignals[index/2].imag();
+      } else y = channelSignalsPAM[index];
 
       // 0,0 --> -2; 0, 1 or 1, 0 --> 0; 1, 1 --> 2.
-      double pSumM2 =  gaussianFunc(y, (-2) / sqrt(2) * sqrt(Esender), sigma);            
+      double pSumM2 =  gaussianFunc(y, (-2) * digitalNorFactor * sqrt(Esender), sigma);            
 	    double pSum0 = gaussianFunc(y, 0, sigma);    
-	    double pSum2 = gaussianFunc(y, 2 / sqrt(2) * sqrt(Esender), sigma);     
+	    double pSum2 = gaussianFunc(y, 2 * digitalNorFactor * sqrt(Esender), sigma);     
 
 			sysChannelOutput[index] = vector<double> {0, 0, pSumM2, pSum0, pSum2};
 			vecNorm(sysChannelOutput[index]);
@@ -467,14 +498,16 @@ int main() {
 			sysNodeInfo1[index].clearMessage();
       sysNodeInfo2[index].clearMessage();
     }
-    
+
 		// Calculate the pdf of corrupted synthetic RP symbols (Initialization for synthetic symbol nodes)    
 		for(int index=0;index<symbolNumber;++index) {
-			double y;
-			if(index % 2 == 0)
-	  		y = channelSignals[(sysNumber + index) / 2].real();
-			else
-	  		y = channelSignals[(sysNumber + index) / 2].imag();
+			double y = 0;
+      if(modulationMethod == "QAM") {
+			  if(index % 2 == 0)
+	  		  y = channelSignals[(sysNumber + index) / 2].real();
+			  else
+	  		  y = channelSignals[(sysNumber + index) / 2].imag();
+      } else y = channelSignalsPAM[sysNumber + index];
 
 			vector<double> symdis(symSumPdfSize, 0);
       
@@ -491,16 +524,18 @@ int main() {
 
    	// Initialization for coded nodes.
 		for(int index=0; index<codedNumber; ++index) {
-			double y;
-			if(index % 2 == 0)
-				y = channelSignals[(sysNumber + symbolNumber + index) / 2].real();
-			else
-				y = channelSignals[(sysNumber + symbolNumber + index) / 2].imag();
-
-			// 0,0 --> -2; 0, 1 or 1, 0 --> 0; 1, 1 --> 2.
-			double pSumM2 =  gaussianFunc(y, (-2) / sqrt(2) * sqrt(Esender), sigma);            
+			double y = 0;
+      if(modulationMethod == "QAM") {
+			  if(index % 2 == 0)
+				  y = channelSignals[(sysNumber + symbolNumber + index) / 2].real();
+			  else
+				  y = channelSignals[(sysNumber + symbolNumber + index) / 2].imag();
+      } else y = channelSignalsPAM[sysNumber + symbolNumber + index];
+			
+      // 0,0 --> -2; 0, 1 or 1, 0 --> 0; 1, 1 --> 2.
+			double pSumM2 =  gaussianFunc(y, (-2) * digitalNorFactor * sqrt(Esender), sigma);            
       double pSum0 = gaussianFunc(y, 0, sigma);    
-      double pSum2 = gaussianFunc(y, 2 / sqrt(2) * sqrt(Esender), sigma);     
+      double pSum2 = gaussianFunc(y, 2 * digitalNorFactor * sqrt(Esender), sigma);     
 
 			codedChannelOutput[index] = log((pSumM2 + 0.5 * pSum0) / (pSum2 + 0.5 * pSum0));
 			
@@ -520,7 +555,7 @@ int main() {
     int iterationtime = 200;
     int currentTime =0;  
     double watchllr[sysNumber];
-
+    
     vector<int> predecision1(sysNumber, 0);
     vector<int> predecision2(sysNumber, 0);
     int sametime = 0;
@@ -538,24 +573,32 @@ int main() {
 			
 			for(int i=0; i<sysNumber; i++) {
 				double y = 0;
-				if(i % 2 == 0)
-					y = channelSignals[i/2].real();
-				else
-					y = channelSignals[i/2].imag();
+				if(modulationMethod == "QAM") {
+          if(i % 2 == 0)
+					  y = channelSignals[i/2].real();
+				  else
+					  y = channelSignals[i/2].imag();
+        } else y = channelSignalsPAM[i];
 
 				pdfMessageFromSys[i] = syntheticDecoderSys(sysNodeInfo1[i], sysNodeInfo2[i], pdfMessageFromRP, codedNodeInfo1, codedNodeInfo2, sysChannelOutput[i], sysChannelLLR, sideInfo, y, sigma, p, i, trackRPPro, systrans1[i], systrans2[i], currentTime);
 			}
 			
 			for(int i=0; i<codedNumber; i++)
 				codedNodeInfo1[i].computeMessage(sysNodeInfo1, codedChannelOutput[i], 2);
-			
-			updateChannelInfo(channelSignals, Esender, sigma, sysNumber + symbolNumber, codedNodeInfo1, codedChannelOutput);
+		
+      if(modulationMethod == "QAM") 
+			  updateChannelInfo(channelSignals, Esender, sigma, sysNumber + symbolNumber, codedNodeInfo1, codedChannelOutput);
+      else  
+        updateChannelInfo(channelSignalsPAM, Esender, sigma, sysNumber + symbolNumber, codedNodeInfo1, codedChannelOutput);
 
 			for(int i=0; i<codedNumber; i++)
 				codedNodeInfo2[i].computeMessage(sysNodeInfo2, codedChannelOutput[i], 2);
+      
+      if(modulationMethod == "QAM")
+			  updateChannelInfo(channelSignals, Esender, sigma, sysNumber + symbolNumber, codedNodeInfo2, codedChannelOutput);
+		  else
+        updateChannelInfo(channelSignalsPAM, Esender, sigma, sysNumber + symbolNumber, codedNodeInfo2, codedChannelOutput);
 
-			updateChannelInfo(channelSignals, Esender, sigma, sysNumber + symbolNumber, codedNodeInfo2, codedChannelOutput);
-		
 			// Count error number.
       double errorbit = 0;
       
@@ -635,31 +678,41 @@ int main() {
   erroreachblock.close();
 } 
 
+double updateChannelInfoCalculator(double estimate, double y, double Esender, double noiseVar) {
+  
+  double nominator1 = exp(-pow(y,2) / (2 * noiseVar)) / exp(estimate);
+	double nominator2 = exp(-pow(y + 2 / sqrt(2) * sqrt(Esender), 2) / (2 * noiseVar));
+	double denominator1 = exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * noiseVar)) / exp(estimate);
+	double denominator2 = (exp(-pow(y, 2) / (2 * noiseVar)));
+
+	if(std::isinf(nominator1) && std::isinf(denominator1)) {
+    return log(exp(-pow(y, 2) / (2 * noiseVar)) / exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * noiseVar)));
+	} else {
+		return log((nominator1 + nominator2) / (denominator1 + denominator2));
+	}
+}
+
 void updateChannelInfo(vector<complex<double> >& channelSignals, double Esender, double noiseVar, int start, vector<Coded_info>& codedNodeInfo, vector<double>& codedChannelOutput) {
 	
 	int codedNumber = codedChannelOutput.size();
 
 	for(int i=0; i<codedNumber; i++) {
-				double y;
+				double y = 0;
 				if(i % 2 == 0)
 					y = channelSignals[(start + i) / 2].real();
 				else
 					y = channelSignals[(start + i) / 2].imag();
 
-				double estimate = codedNodeInfo[i].message_to_state;
-				double nominator1 = exp(-pow(y,2) / (2 * noiseVar)) / exp(estimate);
-				double nominator2 = exp(-pow(y + 2 / sqrt(2) * sqrt(Esender), 2) / (2 * noiseVar));
-				double denominator1 = exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * noiseVar)) / exp(estimate);
-				double denominator2 = (exp(-pow(y, 2) / (2 * noiseVar)));
-
-				if(std::isinf(nominator1) && std::isinf(denominator1)) {
-					codedChannelOutput[i] = log(exp(-pow(y, 2) / (2 * noiseVar)) / exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * noiseVar)));
-				} else {
-					codedChannelOutput[i] = log((nominator1 + nominator2) / (denominator1 + denominator2));
-				}
-
+				codedChannelOutput[i] = updateChannelInfoCalculator(codedNodeInfo[i].message_to_state, y, Esender, noiseVar);
 	}
+}
 
+void updateChannelInfo(vector<double>& channelSignals, double Esender, double noiseVar, int start, vector<Coded_info>& codedNodeInfo, vector<double>& codedChannelOutput) {
+  int codedNumber = codedChannelOutput.size();
+  for(int i=0; i<codedNumber; i++) {
+    double y = channelSignals[start + i];
+    codedChannelOutput[i] = updateChannelInfoCalculator(codedNodeInfo[i].message_to_state, y, Esender, noiseVar);
+  }
 }
 
 vector<int> interleaver(vector<int> &source, double percentage, vector<Sys_info> &sysNode, vector<Coded_info> &codedInfo, int codedNoP, int group) {

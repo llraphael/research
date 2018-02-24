@@ -1659,9 +1659,9 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
   p2FromCoded = p2FromCoded / pTotal;
 
 	// Combine everything and normalize them.
-	double p0Final = p0FromCoded * p0FromRP * channelInfo[2] * (1 - p) * 0.5;
+	double p0Final = p0FromCoded * p0FromRP * channelInfo[2] * 0.5 * (1 - p);
 	double p1Final = p1FromCoded * p1FromRP * channelInfo[3] * p;
-	double p2Final = p2FromCoded * p2FromRP * channelInfo[4] * (1 - p) * 0.5;
+	double p2Final = p2FromCoded * p2FromRP * channelInfo[4] * 0.5 * (1 - p);
 	pTotal = p0Final + p1Final + p2Final;
 	p0Final /= pTotal;
 	p1Final /= pTotal;
@@ -1685,20 +1685,9 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 	double pLDGM1_1 = p1FromCoded1 * (p1Prior * (1 - p) + p0Prior * p) * (channelInfo[4] + channelInfo[3] * p0Prior) * (p2FromRP + p1FromRP * p0Prior);
 
 	
-	/* // Update LDGM2 without using channel and RP information.
-	double pLDGM2_0 = p0FromCoded2 * (pLDGM1_0 * (1 - p) + pLDGM1_1 * p);
-	double pLDGM2_1 = p1FromCoded2 * (pLDGM1_1 * (1 - p) + pLDGM1_0 * p);
-*/
-
 	// Use message from RP and Channel with LDGM1 pro
 	double pLDGM2_0 = p0FromCoded2 * (pLDGM1_0 * (1 - p) + pLDGM1_1 * p) * (channelInfo[2] + channelInfo[3] * pLDGM1_1) * (p0FromRP + p1FromRP * pLDGM1_1);
 	double pLDGM2_1 = p1FromCoded2 * (pLDGM1_0 * p + pLDGM1_1 * (1 - p)) * (channelInfo[4] + channelInfo[3] * pLDGM1_0) * (p2FromRP + p1FromRP * pLDGM1_0);
-
-	
-	/* // Use Message from RP and Channel Unbiased
-	double pLDGM2_0 = p0FromCoded2 * (p0FromCoded1 * (1 - p) + p1FromCoded1 * p) * (channelInfo[2] + 0.5 * channelInfo[3]) * (p0FromRP + 0.5 * p1FromRP);
-	double pLDGM2_1 = p1FromCoded2 * (p1FromCoded1 * (1 - p) + p0FromCoded1 * p) * (channelInfo[4] + 0.5 * channelInfo[3]) * (p2FromRP + 0.5 * p1FromRP);
-	*/
 
 	sideInfo[index] = log(pLDGM2_0 / pLDGM2_1);
 
@@ -1727,118 +1716,6 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 		if(std::isnan(outMessage))
 		cout << "Outgoing messages from sys nodes are nan!" << endl;
 	}
-	/*
-//	// Initial LLR for sys node 1
-//	double LLRForSys = log((p0RPandChannel + 0.5 * p1RPandChannel) / 
-//												  (p2RPandChannel + 0.5 * p1RPandChannel));
-//	*/
-//	
-//	double LLRFromRP = log((p0FromRP + 0.5 * p1FromRP) / (p2FromRP + 0.5 * p1FromRP));
-//
-//	/*	
-//	if(sys1 == 0)
-//		channelLLR[index] = 0;
-//	else
-//		channelLLR[index] = 0;
-//	*/
-//	double LLRFinal1 = channelLLR[index] + LLRFromRP + LLRFromLDGM1 + sideInfo[index];
-//	
-//	/*
-//	// If P1 from RP is greater than the other two, this information
-//	// would not be used.
-//	if(p1FromRP >= p0FromRP && p1FromRP >= p2FromRP)
-//		LLRFinal1 -= LLRFromRP;
-//	if(channelInfo[3] >= channelInfo[2] && channelInfo[3] >= channelInfo[4])
-//		LLRFinal1 -= channelLLR[index];
-//	*/
-//
-//	/*
-//	double LLRFinal2 = channelLLR[index] + LLRFromRP + LLRFromLDGM2;
-//	if(p1FromRP >= p0FromRP && p1FromRP >= p2FromRP)
-//		LLRFinal2 -= LLRFromRP;
-//	if(channelInfo[3] >= channelInfo[2] && channelInfo[3] >= channelInfo[4])
-//		LLRFinal2 -= channelLLR[index];
-//*/
-//		
-//	
-//	// Incorporate correlation into LLR.
-//	//LLRFinal1 += log(((1 - p) * exp(LLRFinal2) + p) / (1 - p + p * exp(LLRFinal2)));
-//	//LLRFinal2 += log(((1 - p) * exp(LLRFinal1) + p) / (1 - p + p * exp(LLRFinal1)));
-//
-//	double threshold = 30;
-//	for(int i=0; i<paraDegree; i++) {
-//		double outMessage = LLRFinal1 - inLLR1[i];
-//
-//		if(outMessage < -threshold)  outMessage = -threshold;
-//		else if(outMessage > threshold)  outMessage = threshold;
-//
-//		sysNodeInfo1.setMessage(outMessage, i, 2);
-//				
-//		if(std::isnan(outMessage))
-//		cout << "Outgoing messages from sys nodes are nan!" << endl;
-//	
-//		/*		
-//		outMessage = LLRFinal2 - inLLR2[i];
-//
-//		if(outMessage < -threshold)  outMessage = -threshold;
-//		else if(outMessage > threshold)  outMessage = threshold;
-//
-//		sysNodeInfo2.setMessage(outMessage, i, 2);
-//				
-//		if(std::isnan(outMessage))
-//		cout << "Outgoing messages from sys nodes are nan!" << endl;
-//		*/
-//	}
-//
-//		// Decoding process for sys node 2.
-//		
-//		// Calculate channel state message to sys node 2
-//		double Esender = 1;
-//		double messageToState = LLRFinal1 - channelLLR[index];
-//		double nominator1 = exp(-pow(y, 2) / (2 * pow(sigma, 2))) / exp(messageToState);
-//		double nominator2 = (exp(-pow(y+2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))));
-//		double denominator1 = exp(-pow(y-2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))) / exp(messageToState);
-//		double denominator2 = (exp(-pow(y, 2) / (2 * pow(sigma, 2))));
-//
-//		if(std::isinf(nominator1) && std::isinf(denominator1)) {
-//			channelLLR[index] = log(exp(-pow(y, 2) / (2 * pow(sigma, 2))) / exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * pow(sigma, 2))));
-//		} else {
-//				channelLLR[index] = log((nominator1 + nominator2) / (denominator1 + denominator2));
-//		}
-//
-//		// Update the correlation message for sys node 2.
-//		sideInfo[index] = log(((1 - p) * exp(LLRFinal1) + p) / (1 - p + p * exp(LLRFinal1)));
-//
-//		double LLRFinal2 = channelLLR[index] + LLRFromLDGM2 + sideInfo[index];
-//
-//		for(int i=0; i<paraDegree; i++) {
-//			double outMessage = LLRFinal2 - inLLR2[i];
-//
-//			if(outMessage < -threshold)  outMessage = -threshold;
-//			else if(outMessage > threshold)  outMessage = threshold;
-//
-//			sysNodeInfo2.setMessage(outMessage, i, 2);
-//				
-//			if(std::isnan(outMessage))
-//			cout << "Outgoing messages from sys nodes are nan!" << endl;
-//		}
-//
-//		// Compute the state message to the sys node 1.
-//		messageToState = LLRFinal2 - channelLLR[index];
-//		nominator1 = exp(-pow(y, 2) / (2 * pow(sigma, 2))) / exp(messageToState);
-//		nominator2 = (exp(-pow(y+2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))));
-//		denominator1 = exp(-pow(y-2/sqrt(2)*sqrt(Esender), 2) / (2 * pow(sigma, 2))) / exp(messageToState);
-//		denominator2 = (exp(-pow(y, 2) / (2 * pow(sigma, 2))));
-//
-//		if(std::isinf(nominator1) && std::isinf(denominator1)) {
-//			channelLLR[index] = log(exp(-pow(y, 2) / (2 * pow(sigma, 2))) / exp(-pow(y - 2 / sqrt(2) * sqrt(Esender), 2) / (2 * pow(sigma, 2))));
-//		} else {
-//				channelLLR[index] = log((nominator1 + nominator2) / (denominator1 + denominator2));
-//		}
-//
-//		// Update the correlation message for sys node 1.
-//		sideInfo[index] = log(((1 - p) * exp(LLRFinal2) + p) / (1 - p + p * exp(LLRFinal2)));
-//	
 
 	// Make decision.
 	sysNodeInfo1.llrEstimation = LLRFinal1;
@@ -1866,7 +1743,7 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 	}
 
 
-/*	
+  /*	
 	if(LLRFinal1 >= 0)
 		sysNodeInfo1.decision = 0;
 	else
