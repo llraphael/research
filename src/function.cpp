@@ -1597,11 +1597,12 @@ vector<vector<double> > syntheticDecoderRP(Coded_info &symNodeInfo1, Coded_info 
 vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sysNodeInfo2, vector<vector<vector<double> > >& pdfMessageFromRP, vector<Coded_info> &neiNode1, vector<Coded_info>& neiNode2, vector<double>& channelInfo, vector<double>& channelLLR, vector<double>& sideInfo, double y, double sigma, double p, int index, ofstream &proTrack, int sys1, int sys2, int iteration) {
 
 	int degree = sysNodeInfo1.nodeData.degree;
-	int paraDegree = sysNodeInfo1.nodeData.para_degree;
+	int paraDegree1 = sysNodeInfo1.nodeData.para_degree;
+  int paraDegree2 = sysNodeInfo2.nodeData.para_degree;
 
 	vector<vector<double> > inPdfMessage(degree);
-	vector<double> inLLR1(paraDegree);
-	vector<double> inLLR2(paraDegree);
+	vector<double> inLLR1(paraDegree1);
+	vector<double> inLLR2(paraDegree2);
 
   // Get incoming pdf messages from neighboring synthetic RP symbol nodes. 
 	for(int i=0; i<degree; i++) {
@@ -1611,11 +1612,12 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 	}
 
   // Get incoming llr messagesing from neighboring coded bit nodes, including nodes from LDGM1 and LDGM2.
-	for(int i=0; i<paraDegree; i++) {
+	for(int i=0; i<paraDegree1; i++) {
 		int neiNum1 = sysNodeInfo1.nodeData.para_neighbourNum[i];
 		int messageIndex1 = sysNodeInfo1.nodeData.para_inmessageIndex[i];
 		inLLR1[i] = neiNode1[neiNum1].getMessage(messageIndex1);
-
+  }
+  for(int i=0; i<paraDegree2; i++) {
 		int neiNum2 = sysNodeInfo2.nodeData.para_neighbourNum[i];
 		int messageIndex2 = sysNodeInfo2.nodeData.para_inmessageIndex[i];
 		inLLR2[i] = neiNode2[neiNum2].getMessage(messageIndex2);
@@ -1639,10 +1641,8 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 
 	// Combine messages from coded nodes
 	double LLRFromLDGM1 = 0, LLRFromLDGM2 = 0;
-	for(int i=0; i<paraDegree; i++) {
-		LLRFromLDGM1 += inLLR1[i]; 
-		LLRFromLDGM2 += inLLR2[i];
-	}
+	for(int i=0; i<paraDegree1; i++)  LLRFromLDGM1 += inLLR1[i];
+	for(int i=0; i<paraDegree2; i++)  LLRFromLDGM2 += inLLR2[i];
 	
 	double p1FromCoded1 = 1 / (1 + exp(LLRFromLDGM1));
 	double p0FromCoded1 = 1 - p1FromCoded1;
@@ -1684,18 +1684,27 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 	double pLDGM1_0 = p0FromCoded1 * (p0Prior * (1 - p) + p1Prior * p) * (channelInfo[2] + channelInfo[3] * p1Prior) * (p0FromRP + p1FromRP * p1Prior);
 	double pLDGM1_1 = p1FromCoded1 * (p1Prior * (1 - p) + p0Prior * p) * (channelInfo[4] + channelInfo[3] * p0Prior) * (p2FromRP + p1FromRP * p0Prior);
 
-	
 	// Use message from RP and Channel with LDGM1 pro
 	double pLDGM2_0 = p0FromCoded2 * (pLDGM1_0 * (1 - p) + pLDGM1_1 * p) * (channelInfo[2] + channelInfo[3] * pLDGM1_1) * (p0FromRP + p1FromRP * pLDGM1_1);
 	double pLDGM2_1 = p1FromCoded2 * (pLDGM1_0 * p + pLDGM1_1 * (1 - p)) * (channelInfo[4] + channelInfo[3] * pLDGM1_0) * (p2FromRP + p1FromRP * pLDGM1_0);
 
 	sideInfo[index] = log(pLDGM2_0 / pLDGM2_1);
-
-	double LLRFinal1 = log(pLDGM1_0 / pLDGM1_1);
+/*
+  p0Final = pLDGM1_0 * pLDGM2_0;
+  p1Final = pLDGM1_0 * pLDGM2_1 + pLDGM1_1 * pLDGM2_0;
+  p2Final = pLDGM1_1 * pLDGM2_1;
+  for(int i=0; i<degree; i++) {
+		outPdf[i][2] = p0Final / inPdfMessage[i][2];
+		outPdf[i][3] = p1Final / inPdfMessage[i][3];
+		outPdf[i][4] = p2Final / inPdfMessage[i][4];
+		vecNorm(outPdf[i]);
+	}
+	*/
+  double LLRFinal1 = log(pLDGM1_0 / pLDGM1_1);
 	double LLRFinal2 = log(pLDGM2_0 / pLDGM2_1); 
 
 	double threshold = 30;
-	for(int i=0; i<paraDegree; i++) {
+	for(int i=0; i<paraDegree1; i++) {
 		double outMessage = LLRFinal1 - inLLR1[i];
 
 		if(outMessage < -threshold)  outMessage = -threshold;
@@ -1705,8 +1714,9 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 				
 		if(std::isnan(outMessage))
 		cout << "Outgoing messages from sys nodes are nan!" << endl;
-	
-		outMessage = LLRFinal2 - inLLR2[i];
+  }
+  for(int i=0; i<paraDegree2; i++) {
+		double outMessage = LLRFinal2 - inLLR2[i];
 
 		if(outMessage < -threshold)  outMessage = -threshold;
 		else if(outMessage > threshold)  outMessage = threshold;

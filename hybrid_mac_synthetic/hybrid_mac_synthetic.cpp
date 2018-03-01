@@ -70,13 +70,13 @@ Matrix linearMatrixConsD8(int N, vector<int> &weight, int seed)
 			     {1, 0} };
   */
 
- 	
+ /*	
   //For weightset size of 8
   int horizontalseq[][4] = { {2, 3, 1, 0},
 			     {1, 0, 2, 3},
 			     {3, 2, 0, 1},
 			     {0, 1, 3, 2} };
-  
+  */
   
   //For weightset size of 16
   /*
@@ -85,12 +85,12 @@ Matrix linearMatrixConsD8(int N, vector<int> &weight, int seed)
 			     {7, 6, 5, 4, 3, 2, 1, 0},
 			     {3, 2, 1, 0, 7, 6, 5, 4} };
  */
-  /*
+ 
   int horizontalseq[][8] = { {7, 3, 6, 2, 5, 1, 4, 0},
 			     {0, 4, 1, 5, 2, 6, 3, 7},
 			     {4, 3, 5, 2, 6, 0, 7, 1},
 			     {2, 6, 3, 7, 0, 5, 1, 4} };
-	 */
+	 
   //Four row elementary matrices group forms a whole matrix
   Matrix matrixhori[4]; 
 
@@ -129,13 +129,14 @@ int main() {
   int sysNumber = 10000;
   int symbolNumber = 10000;
   int codedNumber = 10000;
-  int sysDegree = 18;
-  
+  int sysDegree = 30;
+  int sysDegree2 = 18;
+
   double p1 = 0.5;    //sparsity of the source.
   double p0 = 1 - p1;
-  double p = 0.1; // correlation between source 1 and source 2.
+  double p = 0.01; // correlation between source 1 and source 2.
 
-  string modulationMethod = "PAM";
+  string modulationMethod = "QAM";
 
   double H_U1_givenU2 = -p*log2(p) - (1 - p) * log2(1 - p);
   double H_U2 = 1;
@@ -160,8 +161,8 @@ int main() {
   cout<<"channel capacity is: "<<capacity<<endl;
 
   //weightset
-  //int wval[] = {1, 1, 1, 1, 2, 2, 2, 2};
-  int wval[] = {2, 3, 4, 8};
+  int wval[] = {1, 1, 1, 1, 2, 2, 2, 2};
+  //int wval[] = {2, 3, 4, 8};
   //int wval[] = {1, 2};
   int weightSize = 2 * sizeof(wval) / sizeof(int);
   vector<double> weightset(weightSize, 0);
@@ -227,7 +228,7 @@ int main() {
 	multimap<int, int> onePositionByRow1(maData1[0]);
 	multimap<int, int> onePositionByColumn1(maData1[1]);
 
-	vector<multimap<int, int> > maData2 = paritycm(sysNumber, codedNumber, sysDegree, sysNumber, 3350);
+	vector<multimap<int, int> > maData2 = paritycm(sysNumber, codedNumber, sysDegree2, sysNumber, 3350);
 	multimap<int, int> onePositionByRow2(maData2[0]);
 	multimap<int, int> onePositionByColumn2(maData2[1]);
 
@@ -317,7 +318,7 @@ int main() {
 	vector<double> codedChannelOutput(codedNumber, 0);
 
 	// Channel information.
-	double gap = -1;
+	double gap = 1;
 	double snr = capacity + gap;
   double sigma = sqrt( Eso / (2 * pow(10, snr/10)) ); 
   double noiseVar = pow(sigma, 2);
