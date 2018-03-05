@@ -15,39 +15,26 @@
 
 using namespace std;
 
-void printPdf(const vector<double> &pdf)
-{
-  for(int i=0;i<pdf.size();++i)
-    cout<<pdf[i]<<" ";
-  cout<<endl;
-};
-
-void printMatrix(Matrix &ma);
-
 void horizontalStack(vector<Matrix> &ma, int stacksequen[], int &seed, Matrix &result);
 
-Matrix consEleMatrix(int row, int column, int value)
-{
+Matrix consEleMatrix(int row, int column, int value) {
   Matrix elematrix(row, column);
 
-  for(int i=0;i<row;++i)
-    {
-      int j= 2 * i;
-      ElementData ele(i, j, value);
-      elematrix.readData(ele);
+  for(int i=0;i<row;++i) {
+    int j= 2 * i;
+    ElementData ele(i, j, value);
+    elematrix.readData(ele);
 
-      ++j;
-      ele.setValue(i, j, -1 * value);
-      elematrix.readData(ele);
-    }
-  
+    ++j;
+    ele.setValue(i, j, -1 * value);
+    elematrix.readData(ele);
+  }
   return elematrix;
 }
 
 
 //Generate a N/2 x N  matrix with symbol degree 8
-Matrix linearMatrixConsD8(int N, vector<int> &weight, int seed)
-{
+Matrix linearMatrixConsD8(int N, vector<int> &weight, int seed) {
 
   int weightpair = weight.size();
 
@@ -102,11 +89,9 @@ Matrix linearMatrixConsD8(int N, vector<int> &weight, int seed)
     finalmatrix.matrixStackDown(matrixhori[i]);
 
   return finalmatrix;
-
 }
 
-void horizontalStack(vector<Matrix> &ma, int stacksequen[], int &seed, Matrix &result)
-{
+void horizontalStack(vector<Matrix> &ma, int stacksequen[], int &seed, Matrix &result) {
   int manum = ma.size();
 
   for(int i=0;i<manum;++i)
@@ -115,7 +100,6 @@ void horizontalStack(vector<Matrix> &ma, int stacksequen[], int &seed, Matrix &r
   result = ma[stacksequen[0]];
   for(int i=1;i<manum;++i)
     result.matrixStackRight(ma[stacksequen[i]]);
-  
 }
 
 double getSymPdf(vector<double> symbolSet, vector<double> estimate, double candiVal, double norFactor, double y, double sigma);
@@ -130,7 +114,7 @@ int main() {
   int symbolNumber = 10000;
   int codedNumber = 10000;
   int sysDegree = 30;
-  int sysDegree2 = 18;
+  int sysDegree2 = 30;
 
   double p1 = 0.5;    //sparsity of the source.
   double p0 = 1 - p1;
@@ -146,8 +130,8 @@ int main() {
   double R = (H_U1_givenU2 + H_U2) * codeRate * 2;
   if(modulationMethod == "PAM")  R /= 2;
 
-  double throughput = codeRate * 2;
-  if(modulationMethod == "PAM")  throughput = codeRate;
+  double throughput = codeRate * 4;
+  if(modulationMethod == "PAM")  throughput = 2 * codeRate;
  
   // In terms of Eso/N0 considering QAM.
   double capacity = 10 * log10((pow(2, R) - 1) / (4 * codeRate));
