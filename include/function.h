@@ -224,6 +224,8 @@ std::vector<std::vector<double> > syntheticDecoderRP(Coded_info &symNodeInfo1, C
 
 std::vector<std::vector<double> > syntheticDecoderRP(Coded_info &symNodeInfo1, Coded_info &symNodeInfo2, int symIndex, std::vector<std::vector<std::vector<double> > > &pdfMessageFromSys, std::vector<double> &channelPdf, double norFactor);
 
+std::vector<std::vector<double> > syntheticDecoderRPSimplified(Coded_info &symNodeInfo1, Coded_info &symNodeInfo2, int symIndex, std::vector<std::vector<std::vector<double> > > &pdfMessageFromSys, double receivedSym, double noiseVar, double norFactor);
+
 std::vector<std::vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sysNodeInfo2, std::vector<std::vector<std::vector<double> > > &pdfMessageFromRP, std::vector<Coded_info> &neiNode1, std::vector<Coded_info> &neiNode2, std::vector<double> &channelInfo, std::vector<double> &channelLLR, std::vector<double>& sideInfo, double y, double sigma, double correlation, int index, std::ofstream &file, int sys1, int sys2, int iteration);
 
 std::vector<std::vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sysNodeInfo2, std::vector<std::vector<std::vector<double> > > &pdfMessageFromRP, std::vector<double> &channelInfo, double correlation, int index, std::ofstream &proTrack, int sys1, int sys2, int iteration);

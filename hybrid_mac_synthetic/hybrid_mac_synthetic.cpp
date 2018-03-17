@@ -111,17 +111,21 @@ void updateChannelInfo(vector<double>& channelSignals, double Esender, double no
 int main() {
   // Source info
   int sysNumber = 10000;
-  int symbolNumber = 10000;
-  int codedNumber = 10000;
-  int sysDegree = 30;
-  int sysDegree2 = 30;
+  int symbolNumber = 2000;
+  int codedNumber = 2000;
+  int sysDegree = 10;
+  int sysDegree2 = 10;
 
   double p1 = 0.5;    //sparsity of the source.
   double p0 = 1 - p1;
-  double p = 0.01; // correlation between source 1 and source 2.
+  double p = 0.005; // correlation between source 1 and source 2.
 
+  // Variables that determine the modulation and decoding method
+  // Modulation: "PAM" or "QAM". 
+  // Decoding: 1: Original, 2. Simplified.
   string modulationMethod = "QAM";
-
+  int decodingMethod = 2;
+  
   double H_U1_givenU2 = -p*log2(p) - (1 - p) * log2(1 - p);
   double H_U2 = 1;
   double entropy = H_U1_givenU2 + H_U2;
@@ -554,9 +558,19 @@ int main() {
 
       ++currentTime;
      
-			for(int i=0; i<symbolNumber; i++)
-				pdfMessageFromRP[i] = syntheticDecoderRP(symNodeInfo1[i], symNodeInfo2[i], i, pdfMessageFromSys, channelPdf[i], norFactor);
-			
+			for(int i=0; i<symbolNumber; i++) {
+				if(decodingMethod == 1)
+          pdfMessageFromRP[i] = syntheticDecoderRP(symNodeInfo1[i], symNodeInfo2[i], i, pdfMessageFromSys, channelPdf[i], norFactor);
+			  else {
+          double y = 0;
+          if(modulationMethod == "QAM") {
+            y = i % 2 == 0 ? channelSignals[(sysNumber + i) / 2].real() : channelSignals[(sysNumber + i) / 2].imag();
+          } else y = channelSignalsPAM[sysNumber + i];
+
+          pdfMessageFromRP[i] = syntheticDecoderRPSimplified(symNodeInfo1[i], symNodeInfo2[i], i, pdfMessageFromSys, y, noiseVar, norFactor); 
+        }
+      }
+
 			for(int i=0; i<sysNumber; i++) {
 				double y = 0;
 				if(modulationMethod == "QAM") {

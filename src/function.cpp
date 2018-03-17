@@ -240,14 +240,10 @@ map<int, vector<vector<int> > > getMappingTable(vector<double> &weightSet, int z
   return table;
 }
 
-double gaussianFunc(double signal, double mean, double sigma)
-{
-
+double gaussianFunc(double signal, double mean, double sigma) {
   double res =  1 / sqrt(2*pi*pow(sigma,2)) *	    \
     exp(-pow(signal-mean, 2) / (2*pow(sigma,2)));
-
   return res;
-
 }
 
 //Add one to current number based on the given base system), leftmost position is lowest. if overflow, become all zero. 
@@ -1584,11 +1580,55 @@ vector<vector<double> > syntheticDecoderRP(Coded_info &symNodeInfo1, Coded_info 
 					p2 += resPdf[comPos] * channelPdf[symI];
 	
 		}
-
 		// Out going pdf one the current edge.
 		vector<double> oneOutMessage {0, 0, p0, p1, p2};
 		vecNorm(oneOutMessage);
 		outPdf.emplace_back(oneOutMessage);
+	}
+	return outPdf;
+}
+
+// Simplified Synthetic RP decoder with synthetic sys nodes.
+vector<vector<double> > syntheticDecoderRPSimplified(Coded_info &symNodeInfo1, Coded_info &symNodeInfo2, int symIndex, vector<vector<vector<double> > > &pdfMessageFromSys, double receivedSym, double noiseVar, double norFactor) {
+
+	int degree = symNodeInfo1.nodeData.degree;
+
+  // Incoming PDFs.
+	vector<vector<double> > sysPdf(degree, vector<double>(5, 0));
+	for(int index=0; index<degree; ++index) {
+  	int neiNum = symNodeInfo1.nodeData.neighbourNum[index];
+    int messageIndex = symNodeInfo1.nodeData.inmessageIndex[index];
+    sysPdf[index] = pdfMessageFromSys[neiNum][messageIndex];
+	}
+
+  // Get normalized weight set.
+	vector<double> weightSet(symNodeInfo1.weightset);
+	vector<double> norWeight(degree);
+	for(int i=0; i<degree; i++)
+		norWeight[i] = norFactor * weightSet[i]; 
+	
+  // Compute the mean and variance of each bit.
+  vector<double> inMean(degree, 0);
+  vector<double> inVar(degree, 0);
+  double meanSum = 0, varSum = noiseVar;
+  for(int i=0; i<degree; i++) {
+    inMean[i] = 0 * sysPdf[i][2] + 1 * sysPdf[i][3] + 2 * sysPdf[i][4];
+    inVar[i] = pow(0 - inMean[i], 2) * sysPdf[i][2] + pow(1 - inMean[i], 2) * sysPdf[i][3] + pow(2 - inMean[i], 2) * sysPdf[i][4];
+    meanSum += norWeight[i] * inMean[i];
+    varSum += pow(norWeight[i], 2) * inVar[i];
+  }
+
+	// Out going pdfs.
+	vector<vector<double> > outPdf(degree, vector<double>(5, 0));
+
+	for(int i=0; i<degree; i++) {
+    double meanOfLinearComb = meanSum - norWeight[i] * inMean[i];
+    double varOfLinearComb = varSum - pow(norWeight[i], 2) * inVar[i];
+	  double noiseSigma = sqrt(varOfLinearComb);	
+    outPdf[i][2] = gaussianFunc(receivedSym, meanOfLinearComb + norWeight[i] * 0, noiseSigma);
+    outPdf[i][3] = gaussianFunc(receivedSym, meanOfLinearComb + norWeight[i] * 1, noiseSigma);
+    outPdf[i][4] = gaussianFunc(receivedSym, meanOfLinearComb + norWeight[i] * 2, noiseSigma);
+    vecNorm(outPdf[i]);
 	}
 	return outPdf;
 }
@@ -1689,17 +1729,7 @@ vector<vector<double> > syntheticDecoderSys(Sys_info &sysNodeInfo1, Sys_info &sy
 	double pLDGM2_1 = p1FromCoded2 * (pLDGM1_0 * p + pLDGM1_1 * (1 - p)) * (channelInfo[4] + channelInfo[3] * pLDGM1_0) * (p2FromRP + p1FromRP * pLDGM1_0);
 
 	sideInfo[index] = log(pLDGM2_0 / pLDGM2_1);
-/*
-  p0Final = pLDGM1_0 * pLDGM2_0;
-  p1Final = pLDGM1_0 * pLDGM2_1 + pLDGM1_1 * pLDGM2_0;
-  p2Final = pLDGM1_1 * pLDGM2_1;
-  for(int i=0; i<degree; i++) {
-		outPdf[i][2] = p0Final / inPdfMessage[i][2];
-		outPdf[i][3] = p1Final / inPdfMessage[i][3];
-		outPdf[i][4] = p2Final / inPdfMessage[i][4];
-		vecNorm(outPdf[i]);
-	}
-	*/
+
   double LLRFinal1 = log(pLDGM1_0 / pLDGM1_1);
 	double LLRFinal2 = log(pLDGM2_0 / pLDGM2_1); 
 
